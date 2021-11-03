@@ -1,5 +1,5 @@
 #include "console.h"
-#include "sys-info.c"
+#include "sys-info.h"
 
 #include <locale.h>
 
