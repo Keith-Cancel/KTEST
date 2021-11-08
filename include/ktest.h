@@ -43,8 +43,6 @@ void test_status_set_result(TestStatus* status, int result);
         return KTEST_SUCCESS; \
     } while (0)
 
-#endif
-
 #define KTEST_CASE(NAME) int ktest_test_case_##NAME(TestStatus* status__)
 
 #define KTEST_CASE_PROTO(NAME) KTEST_CASE(NAME)
@@ -55,3 +53,5 @@ void test_status_set_result(TestStatus* status, int result);
             fprintf(status__->output, __VA_ARGS__); \
         } \
     } while(0)
+
+#endif
