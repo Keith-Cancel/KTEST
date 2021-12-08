@@ -62,7 +62,7 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
 
 #define KTEST_SET_FIXTURE(HANDLE, NAME) \
     do { \
-        int ktest_err = ktest_set_fixture((HANDLE), (fixFn)ktest_fixture_##NAME, (tearFn)ktest_teardown_##NAME); \
+        int ktest_err = ktest_set_fixture((HANDLE), ktest_list__, (fixFn)ktest_fixture_##NAME, (tearFn)ktest_teardown_##NAME); \
         if(ktest_err != KTEST_SUCCESS) { \
             return ktest_err; \
         } \
