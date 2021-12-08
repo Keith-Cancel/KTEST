@@ -188,11 +188,11 @@ void test_status_set_result(TestStatus* status, int result);
 #define K_ASSERT_GE(x, y) K_ASSERT(x, y, >=)
 #define K_ASSERT_NE(x, y) K_ASSERT(x, y, !=)
 
-#define K_EXPECT_EQ(x, y) K_ASSERT(x, y, ==)
-#define K_EXPECT_LT(x, y) K_ASSERT(x, y, <)
-#define K_EXPECT_LE(x, y) K_ASSERT(x, y, <=)
-#define K_EXPECT_GT(x, y) K_ASSERT(x, y, >)
-#define K_EXPECT_GE(x, y) K_ASSERT(x, y, >=)
-#define K_EXPECT_NE(x, y) K_ASSERT(x, y, !=)
+#define K_EXPECT_EQ(x, y) K_EXPECT(x, y, ==)
+#define K_EXPECT_LT(x, y) K_EXPECT(x, y, <)
+#define K_EXPECT_LE(x, y) K_EXPECT(x, y, <=)
+#define K_EXPECT_GT(x, y) K_EXPECT(x, y, >)
+#define K_EXPECT_GE(x, y) K_EXPECT(x, y, >=)
+#define K_EXPECT_NE(x, y) K_EXPECT(x, y, !=)
 
 #endif
