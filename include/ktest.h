@@ -198,11 +198,11 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
 #define K_EXPECT_GE(x, y) K_EXPECT(x, y, >=)
 #define K_EXPECT_NE(x, y) K_EXPECT(x, y, !=)
 
-
 #define K_ASSERT_STR_EQ(x, y) \
     do {                      \
         if( ktest_str_eq(status__->output, __FILE__, __LINE__, (x), (y)) ) { \
             ktest_status_set_result(status__, 1); \
+            return;                               \
         }                                         \
     } while(0)
 
@@ -210,6 +210,7 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
     do {                      \
         if( ktest_str_ne(status__->output, __FILE__, __LINE__, (x), (y)) ) { \
             ktest_status_set_result(status__, 1); \
+            return;                               \
         }                                         \
     } while(0)
 
