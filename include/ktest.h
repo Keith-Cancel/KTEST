@@ -58,7 +58,7 @@ void test_status_set_result(TestStatus* status, int result);
 
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
 #define KTEST_VAL_PRINT(x)                  \
-    KTEST_PRINTF(_Generic((x),                    \
+    KTEST_PRINTF(_Generic((x),              \
             signed char   : "%u",           \
             unsigned char : "%d",           \
             unsigned short: "%u",           \
@@ -81,5 +81,71 @@ void test_status_set_result(TestStatus* status, int result);
 // No _Generic() so just print as a hex value
 #define KTEST_VAL_PRINT(x) KTEST_PRINTF("0x%"PRIx64, (uint64_t)(x))
 #endif
+
+#define K_ASSERT_EQ_TRUE(x) \
+    do {                    \
+        if ((x) != 1) {     \
+            KTEST_PRINTF("%s:%u: Test Failure\n", __FILE__, __LINE__); \
+            KTEST_PRINTF("  Expected : true\n");       \
+            if((x) == 0) {                             \
+                KTEST_PRINTF("    Actual : false\n");  \
+            } else {                                   \
+                KTEST_PRINTF("    Actual : ");         \
+                KTEST_VAL_PRINT(x);                    \
+                KTEST_PRINTF("\n");                    \
+            }                                          \
+            status__->result = 1;                      \
+            return;                                    \
+        }                                              \
+    } while (0)
+
+#define K_ASSERT_EQ_FALSE(x) \
+    do {                     \
+        if ((x) != 0) {      \
+            KTEST_PRINTF("%s:%u: Test Failure\n", __FILE__, __LINE__); \
+            KTEST_PRINTF("  Expected : false\n");      \
+            if((x) == 1) {                             \
+                KTEST_PRINTF("    Actual : true\n");   \
+            } else {                                   \
+                KTEST_PRINTF("    Actual : ");         \
+                KTEST_VAL_PRINT(x);                    \
+                KTEST_PRINTF("\n");                    \
+            }                                          \
+            status__->result = 1;                      \
+            return;                                    \
+        }                                              \
+    } while (0)
+
+#define K_EXPECT_EQ_TRUE(x) \
+    do {                    \
+        if ((x) != 1) {     \
+            KTEST_PRINTF("%s:%u: Test Failure\n", __FILE__, __LINE__); \
+            KTEST_PRINTF("  Expected : true\n");       \
+            if((x) == 0) {                             \
+                KTEST_PRINTF("    Actual : false\n");  \
+            } else {                                   \
+                KTEST_PRINTF("    Actual : ");         \
+                KTEST_VAL_PRINT(x);                    \
+                KTEST_PRINTF("\n");                    \
+            }                                          \
+            status__->result = 1;                      \
+        }                                              \
+    } while (0)
+
+#define K_EXPECT_EQ_FALSE(x) \
+    do {                     \
+        if ((x) != 0) {      \
+            KTEST_PRINTF("%s:%u: Test Failure\n", __FILE__, __LINE__); \
+            KTEST_PRINTF("  Expected : false\n");      \
+            if((x) == 1) {                             \
+                KTEST_PRINTF("    Actual : true\n");   \
+            } else {                                   \
+                KTEST_PRINTF("    Actual : ");         \
+                KTEST_VAL_PRINT(x);                    \
+                KTEST_PRINTF("\n");                    \
+            }                                          \
+            status__->result = 1;                      \
+        }                                              \
+    } while (0)
 
 #endif
