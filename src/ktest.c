@@ -21,7 +21,7 @@ struct test_list_s {
     TestCase* tests;
 };
 
-int ktest_add_test_case(unsigned* handle, kTestList* list, tcFn test_func, const char* name, const char* description) {
+int ktest_add_test_case(size_t* handle, kTestList* list, tcFn test_func, const char* name, const char* description) {
     if(list->count >= list->capacity) {
         size_t new_cap = list->capacity + 16;
         TestCase* new  = realloc(list->tests, sizeof(TestCase) * new_cap);
@@ -62,7 +62,7 @@ int ktest_add_test_case(unsigned* handle, kTestList* list, tcFn test_func, const
     return KTEST_SUCCESS;
 }
 
-int ktest_set_fixture(unsigned handle, kTestList* list, fixFn setup, tearFn teardown) {
+int ktest_set_fixture(size_t handle, kTestList* list, fixFn setup, tearFn teardown) {
     if(handle >= list->count) {
         return KTEST_BAD_HANDLE;
     }

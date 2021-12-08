@@ -18,8 +18,8 @@ typedef void (*fixFn)(kTestStatus*, void*);
 typedef void (*tearFn)(kTestStatus*, void*);
 
 int ktest_main(int argc, char** argv, const char* name, int (*test_setup)(kTestList*));
-int ktest_add_test_case(unsigned* handle, kTestList* list, tcFn test_func, const char* name, const char* description);
-int ktest_set_fixture(unsigned handle, kTestList* list, fixFn setup, tearFn teardown);
+int ktest_add_test_case(size_t* handle, kTestList* list, tcFn test_func, const char* name, const char* description);
+int ktest_set_fixture(size_t handle, kTestList* list, fixFn setup, tearFn teardown);
 
 int ktest_str_eq(FILE* out, const char* file, unsigned line, const char* str1, const char* str2);
 int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, const char* str2);
