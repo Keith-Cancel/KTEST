@@ -148,4 +148,51 @@ void test_status_set_result(TestStatus* status, int result);
         }                                              \
     } while (0)
 
+#define K_ASSERT(x, y, cmp)  \
+    do {                     \
+        if(!((x) cmp (y))) { \
+            KTEST_PRINTF("%s:%u: Test Failure\n", __FILE__, __LINE__); \
+            KTEST_PRINTF("  Expected : {value} %s ", #cmp); \
+            KTEST_VAL_PRINT(y);            \
+            KTEST_PRINTF("\n");            \
+            KTEST_PRINTF("    Actual : "); \
+            KTEST_VAL_PRINT(x);            \
+            KTEST_PRINTF(" %s ", #cmp);    \
+            KTEST_VAL_PRINT(y);            \
+            KTEST_PRINTF("\n");            \
+            status__->result = 1;          \
+            return;                        \
+        }                                  \
+    } while(0)
+
+#define K_EXPECT(x, y, cmp)  \
+    do {                     \
+        if(!((x) cmp (y))) { \
+            KTEST_PRINTF("%s:%u: Test Failure\n", __FILE__, __LINE__); \
+            KTEST_PRINTF("  Expected : {value} %s ", #cmp); \
+            KTEST_VAL_PRINT(y);            \
+            KTEST_PRINTF("\n");            \
+            KTEST_PRINTF("    Actual : "); \
+            KTEST_VAL_PRINT(x);            \
+            KTEST_PRINTF(" %s ", #cmp);    \
+            KTEST_VAL_PRINT(y);            \
+            KTEST_PRINTF("\n");            \
+            status__->result = 1;          \
+        }                                  \
+    } while(0)
+
+#define K_ASSERT_EQ(x, y) K_ASSERT(x, y, ==)
+#define K_ASSERT_LT(x, y) K_ASSERT(x, y, <)
+#define K_ASSERT_LE(x, y) K_ASSERT(x, y, <=)
+#define K_ASSERT_GT(x, y) K_ASSERT(x, y, >)
+#define K_ASSERT_GE(x, y) K_ASSERT(x, y, >=)
+#define K_ASSERT_NE(x, y) K_ASSERT(x, y, !=)
+
+#define K_EXPECT_EQ(x, y) K_ASSERT(x, y, ==)
+#define K_EXPECT_LT(x, y) K_ASSERT(x, y, <)
+#define K_EXPECT_LE(x, y) K_ASSERT(x, y, <=)
+#define K_EXPECT_GT(x, y) K_ASSERT(x, y, >)
+#define K_EXPECT_GE(x, y) K_ASSERT(x, y, >=)
+#define K_EXPECT_NE(x, y) K_ASSERT(x, y, !=)
+
 #endif
