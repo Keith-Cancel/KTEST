@@ -38,10 +38,10 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
 #define KTEST_UNKOWN_MEM     (0x0FFF | _KTEST_MEMORY_ERR)
 
 #define KTEST_CASE(NAME)          int ktest_case_##NAME(kTestStatus* status__, void* fix)
-#define KTEST_CASE_FIX(NAME, FIX) int ktest_case_##NAME(kTestStatus* status__, struct ##FIX* fix)
+#define KTEST_CASE_FIX(NAME, FIX) int ktest_case_##NAME(kTestStatus* status__, struct FIX * fix)
 
-#define KTEST_FIX(NAME)          int ktest_fixture_##NAME(kTestStatus* status__, struct ##NAME* fix)
-#define KTEST_FIX_TEARDOWN(NAME) int ktest_teardown_##NAME(kTestStatus* status__, struct ##NAME* fix)
+#define KTEST_FIX(NAME)          int ktest_fixture_##NAME(kTestStatus* status__, struct NAME* fix)
+#define KTEST_FIX_TEARDOWN(NAME) int ktest_teardown_##NAME(kTestStatus* status__, struct NAME* fix)
 
 #define KTEST_SETUP(NAME) \
     int ktest_setup_##NAME(kTestList* ktest_list__); \
