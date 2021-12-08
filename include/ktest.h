@@ -14,7 +14,7 @@ int ktest_main(int argc, char** argv, const char* name, int (*test_setup)(TestLi
 int ktest_add_test_case(TestList* list, int (*test_func)(TestStatus*), const char* name, const char* description);
 int ktest_clean_up();
 
-void test_status_set_result(TestStatus* status, int result);
+void ktest_status_set_result(TestStatus* status, int result);
 
 #define _KTEST_GENERAL_ERR  0x0000
 #define _KTEST_MEMORY_ERR   0xF000
@@ -94,7 +94,7 @@ void test_status_set_result(TestStatus* status, int result);
                 KTEST_VAL_PRINT(x);                    \
                 KTEST_PRINTF("\n");                    \
             }                                          \
-            status__->result = 1;                      \
+            test_status_set_result(status__, 1);       \
             return;                                    \
         }                                              \
     } while (0)
@@ -111,7 +111,7 @@ void test_status_set_result(TestStatus* status, int result);
                 KTEST_VAL_PRINT(x);                    \
                 KTEST_PRINTF("\n");                    \
             }                                          \
-            status__->result = 1;                      \
+            test_status_set_result(status__, 1);       \
             return;                                    \
         }                                              \
     } while (0)
