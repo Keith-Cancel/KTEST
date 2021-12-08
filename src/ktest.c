@@ -131,9 +131,11 @@ struct test_status_s {
 int ktest_main(int argc, char** argv, const char* name, int (*test_setup)(kTestList*)) {
     console_init();
     int ret;
-    kTestList list;
+    kTestList list = { 0 };
+    ret = test_setup(&list);
+    // Just here temporary so I don't see unused variable warnings
     char a = name[0];
     char b = argv[argc-1][0];
-    ret = test_setup(&list);
+
     return EXIT_SUCCESS + ret + b + a;
 }
