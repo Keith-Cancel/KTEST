@@ -13,9 +13,9 @@ struct ktest_status_s {
 };
 typedef struct ktest_status_s kTestStatus;
 
-typedef int (*tcFn) (kTestStatus*, void*);
-typedef int (*fixFn)(kTestStatus*, void*);
-typedef int (*tearFn)(kTestStatus*, void*);
+typedef void (*tcFn) (kTestStatus*, void*);
+typedef void (*fixFn)(kTestStatus*, void*);
+typedef void (*tearFn)(kTestStatus*, void*);
 
 int ktest_main(int argc, char** argv, const char* name, int (*test_setup)(kTestList*));
 int ktest_add_test_case(unsigned* handle, kTestList* list, tcFn test_func, const char* name, const char* description);
@@ -37,11 +37,11 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
 #define KTEST_REALLOC_FAIL   (0x0002 | _KTEST_MEMORY_ERR)
 #define KTEST_UNKOWN_MEM     (0x0FFF | _KTEST_MEMORY_ERR)
 
-#define KTEST_CASE(NAME)          int ktest_case_##NAME(kTestStatus* status__, void* fix)
-#define KTEST_CASE_FIX(NAME, FIX) int ktest_case_##NAME(kTestStatus* status__, struct FIX * fix)
+#define KTEST_CASE(NAME)          void ktest_case_##NAME(kTestStatus* status__, void* fix)
+#define KTEST_CASE_FIX(NAME, FIX) void ktest_case_##NAME(kTestStatus* status__, struct FIX * fix)
 
-#define KTEST_FIX(NAME)          int ktest_fixture_##NAME(kTestStatus* status__, struct NAME* fix)
-#define KTEST_FIX_TEARDOWN(NAME) int ktest_teardown_##NAME(kTestStatus* status__, struct NAME* fix)
+#define KTEST_FIX(NAME)           void ktest_fixture_##NAME(kTestStatus* status__, struct NAME* fix)
+#define KTEST_FIX_TEARDOWN(NAME)  void ktest_teardown_##NAME(kTestStatus* status__, struct NAME* fix)
 
 #define KTEST_SETUP(NAME) \
     int ktest_setup_##NAME(kTestList* ktest_list__); \
@@ -78,6 +78,7 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
 #define KTEST_VAL_PRINT(x)                  \
     KTEST_PRINTF(_Generic((x),              \
+            char          : "%d",           \
             signed char   : "%u",           \
             unsigned char : "%d",           \
             unsigned short: "%u",           \
