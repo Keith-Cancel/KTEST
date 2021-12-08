@@ -70,3 +70,42 @@ void ktest_free_test_list(TestList* list) {
     list->capacity = 0;
     list->tests    = NULL;
 }
+
+int ktest_str_eq(FILE* out, const char* file, unsigned line, const char* str1, const char* str2) {
+    const char* cur1 = str1;
+    const char* cur2 = str2;
+    while(*cur1 && *cur2 && (*cur1 == *cur2)) {
+        cur1++;
+        cur2++;
+    }
+    if(*cur1 != *cur2) {
+        size_t good_bytes = cur1 - str1;
+        char fmt[48] = { 0 };
+        fprintf(out,      "%s:%u: Test Failure\n", file, line);
+        fprintf(out,      "  Expected : %s\n", str2);
+        snprintf(fmt, 47, "    Actual : %%.%zus", good_bytes);
+        fprintf(out, fmt, str1);
+        // Make sure it's not the NULL byte
+        if(*cur1) {
+            printf("%s%c%s%s\n", get_fg_color(L_RED), *cur1, get_reset(), cur1 + 1);
+        }
+        // print pointer to where it first differs
+        fprintf(out, "             ");
+        for(size_t i = 0; i < good_bytes; i++) {
+            fprintf(out, " ");
+        }
+        fprintf(out, "%s^\n%s", get_fg_color(L_RED), get_reset());
+        return 1;
+    }
+    return 0;
+}
+
+int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, const char* str2) {
+    if(strcmp(str1, str2) == 0) {
+        fprintf(out, "%s:%u: Test Failure\n", file, line);
+        fprintf(out, "Unexpected : %s\n", str2);
+        fprintf(out, "    Actual : %s%s%s\n", get_fg_color(L_RED), str2, get_reset());
+        return 1;
+    }
+    return 0;
+}
