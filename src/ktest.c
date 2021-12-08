@@ -81,9 +81,9 @@ int ktest_str_eq(FILE* out, const char* file, unsigned line, const char* str1, c
     if(*cur1 != *cur2) {
         size_t good_bytes = cur1 - str1;
         char fmt[48] = { 0 };
-        fprintf(out,      "%s:%u: Test Failure\n", file, line);
-        fprintf(out,      "  Expected : %s\n", str2);
-        snprintf(fmt, 47, "    Actual : %%.%zus", good_bytes);
+        fprintf(out,      "Test Failure : %s:%u\n", file, line);
+        fprintf(out,      "    Expected : %s\n", str2);
+        snprintf(fmt, 47, "      Actual : %%.%zus", good_bytes);
         fprintf(out, fmt, str1);
         // Make sure it's not the NULL byte
         if(*cur1) {
@@ -102,9 +102,9 @@ int ktest_str_eq(FILE* out, const char* file, unsigned line, const char* str1, c
 
 int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, const char* str2) {
     if(strcmp(str1, str2) == 0) {
-        fprintf(out, "%s:%u: Test Failure\n", file, line);
-        fprintf(out, "Unexpected : %s\n", str2);
-        fprintf(out, "    Actual : %s%s%s\n", get_fg_color(L_RED), str2, get_reset());
+        fprintf(out, "Test Failure : %s:%u\n", file, line);
+        fprintf(out, "Not Expected : %s\n", str2);
+        fprintf(out, "      Actual : %s%s%s\n", get_fg_color(L_RED), str2, get_reset());
         return 1;
     }
     return 0;
