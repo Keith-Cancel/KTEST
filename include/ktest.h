@@ -94,7 +94,7 @@ void ktest_status_set_result(TestStatus* status, int result);
                 KTEST_VAL_PRINT(x);                    \
                 KTEST_PRINTF("\n");                    \
             }                                          \
-            test_status_set_result(status__, 1);       \
+            ktest_status_set_result(status__, 1);      \
             return;                                    \
         }                                              \
     } while (0)
@@ -111,7 +111,7 @@ void ktest_status_set_result(TestStatus* status, int result);
                 KTEST_VAL_PRINT(x);                    \
                 KTEST_PRINTF("\n");                    \
             }                                          \
-            test_status_set_result(status__, 1);       \
+            ktest_status_set_result(status__, 1);      \
             return;                                    \
         }                                              \
     } while (0)
@@ -128,7 +128,7 @@ void ktest_status_set_result(TestStatus* status, int result);
                 KTEST_VAL_PRINT(x);                    \
                 KTEST_PRINTF("\n");                    \
             }                                          \
-            status__->result = 1;                      \
+            ktest_status_set_result(status__, 1);      \
         }                                              \
     } while (0)
 
@@ -144,7 +144,7 @@ void ktest_status_set_result(TestStatus* status, int result);
                 KTEST_VAL_PRINT(x);                    \
                 KTEST_PRINTF("\n");                    \
             }                                          \
-            status__->result = 1;                      \
+            ktest_status_set_result(status__, 1);      \
         }                                              \
     } while (0)
 
@@ -153,16 +153,16 @@ void ktest_status_set_result(TestStatus* status, int result);
         if(!((x) cmp (y))) { \
             KTEST_PRINTF("%s:%u: Test Failure\n", __FILE__, __LINE__); \
             KTEST_PRINTF("  Expected : {value} %s ", #cmp); \
-            KTEST_VAL_PRINT(y);            \
-            KTEST_PRINTF("\n");            \
-            KTEST_PRINTF("    Actual : "); \
-            KTEST_VAL_PRINT(x);            \
-            KTEST_PRINTF(" %s ", #cmp);    \
-            KTEST_VAL_PRINT(y);            \
-            KTEST_PRINTF("\n");            \
-            status__->result = 1;          \
-            return;                        \
-        }                                  \
+            KTEST_VAL_PRINT(y);                   \
+            KTEST_PRINTF("\n");                   \
+            KTEST_PRINTF("    Actual : ");        \
+            KTEST_VAL_PRINT(x);                   \
+            KTEST_PRINTF(" %s ", #cmp);           \
+            KTEST_VAL_PRINT(y);                   \
+            KTEST_PRINTF("\n");                   \
+            ktest_status_set_result(status__, 1); \
+            return;                               \
+        }                                         \
     } while(0)
 
 #define K_EXPECT(x, y, cmp)  \
@@ -170,15 +170,15 @@ void ktest_status_set_result(TestStatus* status, int result);
         if(!((x) cmp (y))) { \
             KTEST_PRINTF("%s:%u: Test Failure\n", __FILE__, __LINE__); \
             KTEST_PRINTF("  Expected : {value} %s ", #cmp); \
-            KTEST_VAL_PRINT(y);            \
-            KTEST_PRINTF("\n");            \
-            KTEST_PRINTF("    Actual : "); \
-            KTEST_VAL_PRINT(x);            \
-            KTEST_PRINTF(" %s ", #cmp);    \
-            KTEST_VAL_PRINT(y);            \
-            KTEST_PRINTF("\n");            \
-            status__->result = 1;          \
-        }                                  \
+            KTEST_VAL_PRINT(y);                   \
+            KTEST_PRINTF("\n");                   \
+            KTEST_PRINTF("    Actual : ");        \
+            KTEST_VAL_PRINT(x);                   \
+            KTEST_PRINTF(" %s ", #cmp);           \
+            KTEST_VAL_PRINT(y);                   \
+            KTEST_PRINTF("\n");                   \
+            ktest_status_set_result(status__, 1); \
+        }                                         \
     } while(0)
 
 #define K_ASSERT_EQ(x, y) K_ASSERT(x, y, ==)
