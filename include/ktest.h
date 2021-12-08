@@ -16,6 +16,9 @@ int ktest_clean_up();
 
 void ktest_status_set_result(TestStatus* status, int result);
 
+int ktest_str_eq(FILE* out, const char* file, unsigned line, const char* str1, const char* str2);
+int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, const char* str2);
+
 #define _KTEST_GENERAL_ERR  0x0000
 #define _KTEST_MEMORY_ERR   0xF000
 
@@ -194,5 +197,34 @@ void ktest_status_set_result(TestStatus* status, int result);
 #define K_EXPECT_GT(x, y) K_EXPECT(x, y, >)
 #define K_EXPECT_GE(x, y) K_EXPECT(x, y, >=)
 #define K_EXPECT_NE(x, y) K_EXPECT(x, y, !=)
+
+
+#define K_ASSERT_STR_EQ(x, y) \
+    do {                      \
+        if( ktest_str_eq(status__->output, __FILE__, __LINE__, (x), (y)) ) { \
+            ktest_status_set_result(status__, 1); \
+        }                                         \
+    } while(0)
+
+#define K_ASSERT_STR_NE(x, y) \
+    do {                      \
+        if( ktest_str_ne(status__->output, __FILE__, __LINE__, (x), (y)) ) { \
+            ktest_status_set_result(status__, 1); \
+        }                                         \
+    } while(0)
+
+#define K_EXPECT_STR_EQ(x, y) \
+    do {                      \
+        if( ktest_str_eq(status__->output, __FILE__, __LINE__, (x), (y)) ) { \
+            ktest_status_set_result(status__, 1); \
+        }                                         \
+    } while(0)
+
+#define K_EXPECT_STR_NE(x, y) \
+    do {                      \
+        if( ktest_str_ne(status__->output, __FILE__, __LINE__, (x), (y)) ) { \
+            ktest_status_set_result(status__, 1); \
+        }                                         \
+    } while(0)
 
 #endif
