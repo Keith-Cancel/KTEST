@@ -7,10 +7,12 @@
 #include "console.h"
 
 typedef struct test_case_s {
-    int (*test_func)(kTestStatus*);
-    char* name;
-    char* description;
-    int   status;
+    tcFn   test_func;
+    fixFn  setup;
+    tearFn tear;
+    char*  name;
+    char*  description;
+    int    status;
 } TestCase;
 
 struct test_list_s {
@@ -19,7 +21,7 @@ struct test_list_s {
     TestCase* tests;
 };
 
-int ktest_add_test_case(kTestList* list, int (*test_func)(kTestStatus*), const char* name, const char* description) {
+int ktest_add_test_case(unsigned* handle, kTestList* list, tcFn test_func, const char* name, const char* description) {
     if(list->count >= list->capacity) {
         size_t new_cap = list->capacity + 16;
         TestCase* new  = realloc(list->tests, sizeof(TestCase) * new_cap);
@@ -32,6 +34,8 @@ int ktest_add_test_case(kTestList* list, int (*test_func)(kTestStatus*), const c
 
     TestCase* cur    = &(list->tests[list->count]);
     cur->test_func   = test_func;
+    cur->setup       = NULL;
+    cur->tear        = NULL;
     cur->name        = NULL;
     cur->description = NULL;
     cur->status      = 0;
@@ -53,7 +57,17 @@ int ktest_add_test_case(kTestList* list, int (*test_func)(kTestStatus*), const c
 
     memcpy(cur->name, name, name_len);
     memcpy(cur->description, description, desc_len);
+    *handle = list->count;
     list->count++;
+    return KTEST_SUCCESS;
+}
+
+int ktest_set_fixture(unsigned handle, kTestList* list, fixFn setup, tearFn teardown) {
+    if(handle >= list->count) {
+        return KTEST_BAD_HANDLE;
+    }
+    list->tests[handle].setup = setup;
+    list->tests[handle].tear  = teardown;
     return KTEST_SUCCESS;
 }
 
@@ -108,4 +122,18 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
         return 1;
     }
     return 0;
+}
+
+struct test_status_s {
+    FILE* output;
+};
+
+int ktest_main(int argc, char** argv, const char* name, int (*test_setup)(kTestList*)) {
+    console_init();
+    int ret;
+    kTestList list;
+    char a = name[0];
+    char b = argv[argc-1][0];
+    ret = test_setup(&list);
+    return EXIT_SUCCESS + ret + b + a;
 }

@@ -13,9 +13,13 @@ struct ktest_status_s {
 };
 typedef struct ktest_status_s kTestStatus;
 
+typedef int (*tcFn) (kTestStatus*, void*);
+typedef int (*fixFn)(kTestStatus*, void*);
+typedef int (*tearFn)(kTestStatus*, void*);
 
 int ktest_main(int argc, char** argv, const char* name, int (*test_setup)(kTestList*));
-int ktest_add_test_case(kTestList* list, int (*test_func)(kTestStatus*), const char* name, const char* description);
+int ktest_add_test_case(unsigned* handle, kTestList* list, tcFn test_func, const char* name, const char* description);
+int ktest_set_fixture(unsigned handle, kTestList* list, fixFn setup, tearFn teardown);
 int ktest_clean_up();
 
 int ktest_str_eq(FILE* out, const char* file, unsigned line, const char* str1, const char* str2);
@@ -26,11 +30,18 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
 
 // General Statuses
 #define KTEST_SUCCESS        _KTEST_GENERAL_ERR
+#define KTEST_BAD_HANDLE     (0x0001 | _KTEST_GENERAL_ERR)
 #define KTEST_UNKNOWN_ERR    (0x0FFF | _KTEST_GENERAL_ERR)
 // Memory Statuses
 #define KTEST_MALLOC_FAIL    (0x0001 | _KTEST_MEMORY_ERR)
 #define KTEST_REALLOC_FAIL   (0x0002 | _KTEST_MEMORY_ERR)
-#define KTEST_UNKOWN_MEM     (0xFFFF | _KTEST_MEMORY_ERR)
+#define KTEST_UNKOWN_MEM     (0x0FFF | _KTEST_MEMORY_ERR)
+
+#define KTEST_CASE(NAME)          int ktest_case_##NAME(kTestStatus* status__, void* fix)
+#define KTEST_CASE_FIX(NAME, FIX) int ktest_case_##NAME(kTestStatus* status__, struct ##FIX* fix)
+
+#define KTEST_FIX(NAME)          int ktest_fixture_##NAME(kTestStatus* status__, struct ##NAME* fix)
+#define KTEST_FIX_TEARDOWN(NAME) int ktest_teardown_##NAME(kTestStatus* status__, struct ##NAME* fix)
 
 #define KTEST_SETUP(NAME) \
     int ktest_setup_##NAME(kTestList* ktest_list__); \
@@ -39,20 +50,23 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
     } \
     int ktest_setup_##NAME(kTestList* ktest_list__)
 
-#define KTEST_ADD_CASE(TEST_FUNC, NAME) KTEST_ADD_CASE_EX(TEST_FUNC, NAME, "")
+#define KTEST_ADD_CASE(NAME, HANDLE_OUT) KTEST_ADD_CASE_EX(NAME, HANDLE_OUT, "")
 
-#define KTEST_ADD_CASE_EX(TEST_FUNC, NAME, DESCRIPTION) \
+#define KTEST_ADD_CASE_EX(NAME, HANDLE_OUT, DESCRIPTION) \
     do { \
-        int ktest_err = ktest_add_test_case(ktest_list__, ktest_test_case_##TEST_FUNC, NAME, DESCRIPTION); \
-        if(ktest_err != 0) { \
+        int ktest_err = ktest_add_test_case((HANDLE_OUT), ktest_list__, (tcFn)ktest_case_##NAME, #NAME, DESCRIPTION); \
+        if(ktest_err != KTEST_SUCCESS) { \
             return ktest_err; \
         } \
-        return KTEST_SUCCESS; \
     } while (0)
 
-#define KTEST_CASE(NAME) int ktest_test_case_##NAME(kTestStatus* status__)
-
-#define KTEST_CASE_PROTO(NAME) KTEST_CASE(NAME)
+#define KTEST_SET_FIXTURE(HANDLE, NAME) \
+    do { \
+        int ktest_err = ktest_set_fixture((HANDLE), (fixFn)ktest_fixture_##NAME, (tearFn)ktest_teardown_##NAME); \
+        if(ktest_err != KTEST_SUCCESS) { \
+            return ktest_err; \
+        } \
+    } while (0)
 
 #define KTEST_PRINTF(...) \
     do { \
