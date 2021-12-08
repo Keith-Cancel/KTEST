@@ -7,7 +7,7 @@
 #include "console.h"
 
 typedef struct test_case_s {
-    int (*test_func)(TestStatus*);
+    int (*test_func)(kTestStatus*);
     char* name;
     char* description;
     int   status;
@@ -19,7 +19,7 @@ struct test_list_s {
     TestCase* tests;
 };
 
-int ktest_add_test_case(TestList* list, int (*test_func)(TestStatus*), const char* name, const char* description) {
+int ktest_add_test_case(kTestList* list, int (*test_func)(kTestStatus*), const char* name, const char* description) {
     if(list->count >= list->capacity) {
         size_t new_cap = list->capacity + 16;
         TestCase* new  = realloc(list->tests, sizeof(TestCase) * new_cap);
@@ -57,7 +57,7 @@ int ktest_add_test_case(TestList* list, int (*test_func)(TestStatus*), const cha
     return KTEST_SUCCESS;
 }
 
-void ktest_free_test_list(TestList* list) {
+void ktest_free_test_list(kTestList* list) {
     for(size_t i = 0; i < list->count; i++) {
         TestCase* cur = list->tests + i;
         free(cur->name);

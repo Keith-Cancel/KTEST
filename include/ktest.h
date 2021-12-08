@@ -2,16 +2,20 @@
 #define KTEST_C_H
 
 #include <inttypes.h>
+#include <stdio.h>
 
 struct test_list_s;
-typedef struct test_list_s TestList;
+typedef struct test_list_s kTestList;
 
-struct test_status_s;
-typedef struct test_status_s TestStatus;
+struct ktest_status_s {
+    FILE* output;
+    int   result;
+};
+typedef struct ktest_status_s kTestStatus;
 
 
-int ktest_main(int argc, char** argv, const char* name, int (*test_setup)(TestList*));
-int ktest_add_test_case(TestList* list, int (*test_func)(TestStatus*), const char* name, const char* description);
+int ktest_main(int argc, char** argv, const char* name, int (*test_setup)(kTestList*));
+int ktest_add_test_case(kTestList* list, int (*test_func)(kTestStatus*), const char* name, const char* description);
 int ktest_clean_up();
 
 int ktest_str_eq(FILE* out, const char* file, unsigned line, const char* str1, const char* str2);
@@ -29,11 +33,11 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
 #define KTEST_UNKOWN_MEM     (0xFFFF | _KTEST_MEMORY_ERR)
 
 #define KTEST_SETUP(NAME) \
-    int ktest_setup_##NAME(TestList* ktest_list__); \
+    int ktest_setup_##NAME(kTestList* ktest_list__); \
     int main(int argc, char **argv) { \
         return ktest_main(argc, argv, #NAME, ktest_setup_##NAME); \
     } \
-    int ktest_setup_##NAME(TestList* ktest_list__)
+    int ktest_setup_##NAME(kTestList* ktest_list__)
 
 #define KTEST_ADD_CASE(TEST_FUNC, NAME) KTEST_ADD_CASE_EX(TEST_FUNC, NAME, "")
 
@@ -46,7 +50,7 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
         return KTEST_SUCCESS; \
     } while (0)
 
-#define KTEST_CASE(NAME) int ktest_test_case_##NAME(TestStatus* status__)
+#define KTEST_CASE(NAME) int ktest_test_case_##NAME(kTestStatus* status__)
 
 #define KTEST_CASE_PROTO(NAME) KTEST_CASE(NAME)
 
