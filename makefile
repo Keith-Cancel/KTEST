@@ -6,7 +6,7 @@ INCLUDES := -I./include
 C_WARN   := -pedantic-errors -Wall -Wextra -Wparentheses -Wdouble-promotion \
 -Warith-conversion -Wduplicated-branches -Wduplicated-cond -Wshadow \
 -Wunsafe-loop-optimizations -Wbad-function-cast -Wunsuffixed-float-constants \
--fanalyzer -Wanalyzer-too-complex
+-fanalyzer
 
 SRC_DIR := src
 OBJ_DIR := obj
