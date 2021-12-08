@@ -1,6 +1,8 @@
 #ifndef KTEST_C_H
 #define KTEST_C_H
 
+#include <inttypes.h>
+
 struct test_list_s;
 typedef struct test_list_s TestList;
 
@@ -53,5 +55,31 @@ void test_status_set_result(TestStatus* status, int result);
             fprintf(status__->output, __VA_ARGS__); \
         } \
     } while(0)
+
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
+#define KTEST_VAL_PRINT(x)                  \
+    KTEST_PRINTF(_Generic((x),                    \
+            signed char   : "%u",           \
+            unsigned char : "%d",           \
+            unsigned short: "%u",           \
+            short         : "%d",           \
+            unsigned int  : "%u",           \
+            int           : "%d",           \
+            unsigned long : "%lu",          \
+            long          : "%ld",          \
+            long long     : "%"PRId64,      \
+            unsigned long long: "%"PRIu64,  \
+            float         : "%f",           \
+            double        : "%f",           \
+            long double   : "%Lf",          \
+            default  : _Generic(((x) - (x)),\
+                ptrdiff_t: "0x%p",          \
+                default  : "0x%"PRIx64      \
+            )                               \
+        ), (x))
+#else
+// No _Generic() so just print as a hex value
+#define KTEST_VAL_PRINT(x) KTEST_PRINTF("0x%"PRIx64, (uint64_t)(x))
+#endif
 
 #endif
