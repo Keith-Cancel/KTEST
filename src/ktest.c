@@ -12,6 +12,7 @@ typedef struct test_case_s {
     tearFn tear;
     char*  name;
     char*  description;
+    size_t fix_sz;
     int    status;
 } TestCase;
 
@@ -38,6 +39,7 @@ int ktest_add_test_case(size_t* handle, kTestList* list, tcFn test_func, const c
     cur->tear        = NULL;
     cur->name        = NULL;
     cur->description = NULL;
+    cur->fix_sz      = 0;
     cur->status      = 0;
 
     size_t name_len  = strlen(name) + 1;
@@ -62,12 +64,13 @@ int ktest_add_test_case(size_t* handle, kTestList* list, tcFn test_func, const c
     return KTEST_SUCCESS;
 }
 
-int ktest_set_fixture(size_t handle, kTestList* list, fixFn setup, tearFn teardown) {
+int ktest_set_fixture(size_t handle, kTestList* list, fixFn setup, tearFn teardown, size_t fixture_size) {
     if(handle >= list->count) {
         return KTEST_BAD_HANDLE;
     }
-    list->tests[handle].setup = setup;
-    list->tests[handle].tear  = teardown;
+    list->tests[handle].setup  = setup;
+    list->tests[handle].tear   = teardown;
+    list->tests[handle].fix_sz = fixture_size;
     return KTEST_SUCCESS;
 }
 
