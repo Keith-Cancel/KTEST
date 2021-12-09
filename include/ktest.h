@@ -8,8 +8,10 @@ struct test_list_s;
 typedef struct test_list_s kTestList;
 
 struct ktest_status_s {
-    FILE* output;
-    int   result;
+    FILE*    output;
+    int      result;
+    unsigned asserts;
+    unsigned expects;
 };
 typedef struct ktest_status_s kTestStatus;
 
@@ -103,6 +105,7 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
 
 #define K_ASSERT_EQ_TRUE(x) \
     do {                    \
+        status__->asserts++;\
         if ((x) != 1) {     \
             KTEST_PRINTF("Test Failure : %s:%u\n", __FILE__, __LINE__); \
             KTEST_PRINTF("    Expected : true\n");     \
@@ -120,6 +123,7 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
 
 #define K_ASSERT_EQ_FALSE(x) \
     do {                     \
+        status__->asserts++; \
         if ((x) != 0) {      \
             KTEST_PRINTF("Test Failure : %s:%u\n", __FILE__, __LINE__); \
             KTEST_PRINTF("    Expected : false\n");    \
@@ -137,6 +141,7 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
 
 #define K_EXPECT_EQ_TRUE(x) \
     do {                    \
+        status__->expects++; \
         if ((x) != 1) {     \
             KTEST_PRINTF("Test Failure : %s:%u\n", __FILE__, __LINE__); \
             KTEST_PRINTF("    Expected : true\n");     \
@@ -153,6 +158,7 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
 
 #define K_EXPECT_EQ_FALSE(x) \
     do {                     \
+        status__->expects++; \
         if ((x) != 0) {      \
             KTEST_PRINTF("Test Failure : %s:%u\n", __FILE__, __LINE__); \
             KTEST_PRINTF("    Expected : false\n");    \
@@ -169,6 +175,7 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
 
 #define K_ASSERT(x, y, cmp)  \
     do {                     \
+        status__->asserts++; \
         if(!((x) cmp (y))) { \
             KTEST_PRINTF("Test Failure : %s:%u\n", __FILE__, __LINE__); \
             KTEST_PRINTF("    Expected : {value} %s ", #cmp); \
@@ -186,6 +193,7 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
 
 #define K_EXPECT(x, y, cmp)  \
     do {                     \
+        status__->expects++; \
         if(!((x) cmp (y))) { \
             KTEST_PRINTF("Test Failure : %s:%u\n", __FILE__, __LINE__); \
             KTEST_PRINTF("    Expected : {value} %s ", #cmp); \
@@ -216,6 +224,7 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
 
 #define K_ASSERT_STR_EQ(x, y)     \
     do {                          \
+        status__->asserts++;      \
         if( ktest_str_eq(status__->output, __FILE__, __LINE__, (x), (y)) ) { \
             status__->result = 1; \
             return;               \
@@ -224,6 +233,7 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
 
 #define K_ASSERT_STR_NE(x, y)     \
     do {                          \
+        status__->asserts++;      \
         if( ktest_str_ne(status__->output, __FILE__, __LINE__, (x), (y)) ) { \
             status__->result = 1; \
             return;               \
@@ -232,6 +242,7 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
 
 #define K_EXPECT_STR_EQ(x, y)     \
     do {                          \
+        status__->expects++;      \
         if( ktest_str_eq(status__->output, __FILE__, __LINE__, (x), (y)) ) { \
             status__->result = 1; \
         }                         \
@@ -239,6 +250,7 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
 
 #define K_EXPECT_STR_NE(x, y)     \
     do {                          \
+        status__->expects++;      \
         if( ktest_str_ne(status__->output, __FILE__, __LINE__, (x), (y)) ) { \
             status__->result = 1; \
         }                         \
