@@ -91,6 +91,7 @@ void ktest_free_test_list(kTestList* list) {
 int ktest_str_eq(FILE* out, const char* file, unsigned line, const char* str1, const char* str2) {
     const char* cur1 = str1;
     const char* cur2 = str2;
+    // Compare manually instead of using strcmp so I know where they differ.
     while(*cur1 && *cur2 && (*cur1 == *cur2)) {
         cur1++;
         cur2++;
@@ -107,9 +108,9 @@ int ktest_str_eq(FILE* out, const char* file, unsigned line, const char* str1, c
             printf("%s%c%s%s\n", get_fg_color_if_tty(L_RED, out), *cur1, get_reset_if_tty(out), cur1 + 1);
         }
         // print pointer to where it first differs
-        fprintf(out, "             ");
+        fprintf(out, "               "); // Padding
         for(size_t i = 0; i < good_bytes; i++) {
-            fprintf(out, " ");
+            fprintf(out, " ");// pad till reaching the point of difference.
         }
         fprintf(out, "%s^\n%s", get_fg_color_if_tty(L_RED, out), get_reset_if_tty(out));
         return 1;
