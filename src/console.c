@@ -8,8 +8,9 @@
     #include <io.h>
     #define isatty _isatty
     #define fileno _fileno
-#else
+#elif CURRENT_OS == OS_UNIX_LIKE
     #include <unistd.h>
+    #include <sys/ioctl.h>
 #endif
 
 
@@ -89,4 +90,29 @@ const char* get_bg_color_if_tty(unsigned color, FILE* file) {
         return empty_str;
     }
     return get_bg_color(color);
+}
+
+int console_get_width(FILE* file) {
+    int fd = fileno(file);
+    if(fd == -1 && !isatty(fd)) {
+        return -1;
+    }
+    #if CURRENT_OS == OS_WINDOWS
+        CONSOLE_SCREEN_BUFFER_INFO info = { 0 };
+        intptr_t ptr = _get_osfhandle(fd);
+        HANDLE h = (HANDLE)ptr;
+        if(h == INVALID_HANDLE_VALUE) {
+            return -1;
+        }
+        if(GetConsoleScreenBufferInfo(h, &info) == 0) {
+            return -1;
+        }
+        return (info.srWindow.Right - info.srWindow.Left);
+    #elif CURRENT_OS == OS_UNIX_LIKE
+        struct winsize sz = { 0 };
+        if(ioctl(fd, TIOCGWINSZ, &sz) == -1) {
+            return -1;
+        }
+        return (int)(sz.ws_col);
+    #endif
 }
