@@ -4,7 +4,12 @@
 #include <locale.h>
 
 #if CURRENT_OS == OS_WINDOWS
-#include <windows.h>
+    #include <windows.h>
+    #include <io.h>
+    #define isatty _isatty
+    #define fileno _fileno
+#else
+    #include <unistd.h>
 #endif
 
 
@@ -26,6 +31,7 @@ static const char* bg_colors[17] = {
     "\x1b[104m", "\x1b[105m", "\x1b[106m", "\x1b[107m"
 };
 
+static const char* empty_str = "";
 
 int console_init() {
     setlocale(LC_ALL, "en_US.UTF-8");
@@ -59,4 +65,28 @@ const char* get_bg_color(unsigned color) {
 
 const char* get_reset() {
     return fg_colors[0];
+}
+
+const char* get_reset_if_tty(FILE* file) {
+    int fd = fileno(file);
+    if(fd == -1 || !isatty(fd)) {
+        return empty_str;
+    }
+    return get_reset();
+}
+
+const char* get_fg_color_if_tty(unsigned color, FILE* file) {
+    int fd = fileno(file);
+    if(fd == -1 || !isatty(fd)) {
+        return empty_str;
+    }
+    return get_fg_color(color);
+}
+
+const char* get_bg_color_if_tty(unsigned color, FILE* file) {
+    int fd = fileno(file);
+    if(fd == -1 || !isatty(fd)) {
+        return empty_str;
+    }
+    return get_bg_color(color);
 }

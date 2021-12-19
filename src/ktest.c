@@ -104,14 +104,14 @@ int ktest_str_eq(FILE* out, const char* file, unsigned line, const char* str1, c
         fprintf(out, fmt, str1);
         // Make sure it's not the NULL byte
         if(*cur1) {
-            printf("%s%c%s%s\n", get_fg_color(L_RED), *cur1, get_reset(), cur1 + 1);
+            printf("%s%c%s%s\n", get_fg_color_if_tty(L_RED, out), *cur1, get_reset_if_tty(out), cur1 + 1);
         }
         // print pointer to where it first differs
         fprintf(out, "             ");
         for(size_t i = 0; i < good_bytes; i++) {
             fprintf(out, " ");
         }
-        fprintf(out, "%s^\n%s", get_fg_color(L_RED), get_reset());
+        fprintf(out, "%s^\n%s", get_fg_color_if_tty(L_RED, out), get_reset_if_tty(out));
         return 1;
     }
     return 0;
@@ -121,7 +121,7 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
     if(strcmp(str1, str2) == 0) {
         fprintf(out, "Test Failure : %s:%u\n", file, line);
         fprintf(out, "Not Expected : %s\n", str2);
-        fprintf(out, "      Actual : %s%s%s\n", get_fg_color(L_RED), str2, get_reset());
+        fprintf(out, "      Actual : %s%s%s\n", get_fg_color_if_tty(L_RED, out), str2, get_reset_if_tty(out));
         return 1;
     }
     return 0;
