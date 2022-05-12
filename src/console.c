@@ -118,3 +118,53 @@ int console_get_width(FILE* file) {
         return (int)(sz.ws_col);
     #endif
 }
+
+void console_set_fg_colors_if_tty(bgColors* fg, FILE* file) {
+    fg->reset     = get_reset_if_tty(file);
+    fg->black     = get_fg_color_if_tty(BLACK, file);
+    fg->red       = get_fg_color_if_tty(RED, file);
+    fg->green     = get_fg_color_if_tty(GREEN, file);
+    fg->yellow    = get_fg_color_if_tty(YELLOW, file);
+    fg->blue      = get_fg_color_if_tty(BLUE, file);
+    fg->magenta   = get_fg_color_if_tty(MAGENTA, file);
+    fg->cyan      = get_fg_color_if_tty(CYAN, file);
+    fg->white     = get_fg_color_if_tty(WHITE, file);
+    fg->gray      = get_fg_color_if_tty(GRAY, file);
+    fg->l_red     = get_fg_color_if_tty(L_RED, file);
+    fg->l_green   = get_fg_color_if_tty(L_GREEN, file);
+    fg->l_yellow  = get_fg_color_if_tty(L_YELLOW, file);
+    fg->l_blue    = get_fg_color_if_tty(L_BLUE, file);
+    fg->l_magenta = get_fg_color_if_tty(L_MAGENTA, file);
+    fg->l_cyan    = get_fg_color_if_tty(L_CYAN, file);
+    fg->l_white   = get_fg_color_if_tty(L_WHITE, file);
+}
+
+void console_set_bg_colors_if_tty(bgColors* bg, FILE* file) {
+    bg->reset     = get_reset_if_tty(file);
+    bg->black     = get_bg_color_if_tty(BLACK, file);
+    bg->red       = get_bg_color_if_tty(RED, file);
+    bg->green     = get_bg_color_if_tty(GREEN, file);
+    bg->yellow    = get_bg_color_if_tty(YELLOW, file);
+    bg->blue      = get_bg_color_if_tty(BLUE, file);
+    bg->magenta   = get_bg_color_if_tty(MAGENTA, file);
+    bg->cyan      = get_bg_color_if_tty(CYAN, file);
+    bg->white     = get_bg_color_if_tty(WHITE, file);
+    bg->gray      = get_bg_color_if_tty(GRAY, file);
+    bg->l_red     = get_bg_color_if_tty(L_RED, file);
+    bg->l_green   = get_bg_color_if_tty(L_GREEN, file);
+    bg->l_yellow  = get_bg_color_if_tty(L_YELLOW, file);
+    bg->l_blue    = get_bg_color_if_tty(L_BLUE, file);
+    bg->l_magenta = get_bg_color_if_tty(L_MAGENTA, file);
+    bg->l_cyan    = get_bg_color_if_tty(L_CYAN, file);
+    bg->l_white   = get_bg_color_if_tty(L_WHITE, file);
+}
+
+void console_set_output_info(outputInfo* out, FILE* file) {
+    out->width = console_get_width(file);
+    if(out->width < 1) {
+        out->width = 80;
+    }
+    out->reset = get_reset_if_tty(file);
+    console_set_fg_colors_if_tty(&(out->fg), file);
+    console_set_bg_colors_if_tty(&(out->bg), file);
+}
