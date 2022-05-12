@@ -24,7 +24,7 @@ struct test_list_s {
 
 int ktest_add_test_case(size_t* handle, kTestList* list, tcFn test_func, const char* name, const char* description) {
     if(list->count >= list->capacity) {
-        size_t new_cap = list->capacity + 16;
+        size_t new_cap = list->capacity ? list->capacity * 2 : 16;
         TestCase* new  = realloc(list->tests, sizeof(TestCase) * new_cap);
         if(new == NULL) {
             return KTEST_REALLOC_FAIL;
@@ -62,6 +62,14 @@ int ktest_add_test_case(size_t* handle, kTestList* list, tcFn test_func, const c
     *handle = list->count;
     list->count++;
     return KTEST_SUCCESS;
+}
+
+static void ktest_free_tests(kTestList* list) {
+    for(size_t i = 0; i < list->count; i++) {
+        free(list->tests[i].name);
+        free(list->tests[i].description);
+    }
+    free(list->tests);
 }
 
 int ktest_set_fixture(size_t handle, kTestList* list, fixFn setup, tearFn teardown, size_t fixture_size) {
@@ -105,7 +113,7 @@ int ktest_str_eq(FILE* out, const char* file, unsigned line, const char* str1, c
         fprintf(out, fmt, str1);
         // Make sure it's not the NULL byte
         if(*cur1) {
-            printf("%s%c%s%s\n", get_fg_color_if_tty(L_RED, out), *cur1, get_reset_if_tty(out), cur1 + 1);
+            fprintf(out, "%s%c%s%s\n", get_fg_color_if_tty(L_RED, out), *cur1, get_reset_if_tty(out), cur1 + 1);
         }
         // print pointer to where it first differs
         fprintf(out, "               "); // Padding
@@ -132,14 +140,39 @@ struct test_status_s {
     FILE* output;
 };
 
-int ktest_main(int argc, char** argv, const char* name, int (*test_setup)(kTestList*)) {
+int ktest_main(int argc, char** argv, const char* name, int (*test_setup)(kTestList*, int*)) {
     console_init();
-    int ret;
     kTestList list = { 0 };
-    ret = test_setup(&list);
+    int line = -1;
+    int ret  = -1;
+
+    printf(
+        "Setting Up: %s'%s'%s\n",
+        get_fg_color_if_tty(L_CYAN, stdout),
+        name, get_reset_if_tty(stdout)
+    );
+
+    ret = test_setup(&list, &line);
+    if(ret != KTEST_SUCCESS) {
+        printf(
+            "Setup: %sFailed%s\n",
+            get_fg_color_if_tty(L_RED, stdout),
+            get_reset_if_tty(stdout)
+        );
+        printf("Line: %d\n", line);
+        printf("Return Code: %d\n", ret);
+        ktest_free_tests(&list);
+        return EXIT_FAILURE;
+    }
+    printf(
+        "Setup: %sDone%s\n",
+        get_fg_color_if_tty(L_GREEN, stdout),
+        get_reset_if_tty(stdout)
+    );
+
     // Just here temporary so I don't see unused variable warnings
     char a = name[0];
     char b = argv[argc-1][0];
 
-    return EXIT_SUCCESS + ret + b + a;
+    return EXIT_SUCCESS + a + b;
 }
