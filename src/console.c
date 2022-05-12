@@ -160,7 +160,8 @@ void console_set_bg_colors_if_tty(bgColors* bg, FILE* file) {
 }
 
 void console_set_output_info(outputInfo* out, FILE* file) {
-    out->width = console_get_width(file);
+    out->output = file;
+    out->width  = console_get_width(file);
     if(out->width < 1) {
         out->width = 80;
     }

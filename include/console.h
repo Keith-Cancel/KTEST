@@ -32,7 +32,7 @@ typedef struct {
 } fgColors, bgColors;
 
 typedef struct {
-    FILE*       out;
+    FILE*       output;
     int         width;
     const char* reset;
     fgColors    fg;

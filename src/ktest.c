@@ -96,19 +96,19 @@ void ktest_free_test_list(kTestList* list) {
     list->tests    = NULL;
 }
 
-int ktest_run_test_case(FILE* out, TestCase* tc) {
+int ktest_run_test_case(outputInfo* out, TestCase* tc) {
     void*       fix  = NULL;
     kTestStatus stat = { 
-        .output = out
+        .output = out->output
     };
     fprintf(
-        out,
+        out->output,
         "[ %sRunning%s: %s%-16s%s]\n",
-        get_fg_color_if_tty(L_BLUE, out),
-        get_reset_if_tty(out),
-        get_fg_color_if_tty(L_CYAN, out),
+        out->fg.l_blue,
+        out->reset,
+        out->fg.l_cyan,
         tc->name,
-        get_reset_if_tty(out)
+        out->reset
     );
     if(tc->setup != NULL) {
         tc->setup(&stat, &fix);
@@ -123,38 +123,38 @@ int ktest_run_test_case(FILE* out, TestCase* tc) {
 
     } else {
         fprintf(
-            out,
+            out->output,
             "[ %sResult%s: %sPassed%s           ]\n",
-            get_fg_color_if_tty(L_BLUE, out),
-            get_reset_if_tty(out),
-            get_fg_color_if_tty(L_GREEN, out),
-            get_reset_if_tty(out)
+            out->fg.l_blue,
+            out->reset,
+            out->fg.l_green,
+            out->reset
         );
     }
     return 0;
 }
 
-int ktest_run_tests(FILE* out, const char* name, const kTestList* list) {
-    fprintf(out, "+==========================+\n");
+int ktest_run_tests(outputInfo* out, const char* name, const kTestList* list) {
+    fprintf(out->output, "+==========================+\n");
     fprintf(
-        out,
+        out->output,
         "| %sRunning%s: %s%-16s%s|\n",
-        get_fg_color_if_tty(L_BLUE, out),
-        get_reset_if_tty(out),
-        get_fg_color_if_tty(L_CYAN, out),
+        out->fg.l_blue,
+        out->reset,
+        out->fg.l_cyan,
         name,
-        get_reset_if_tty(out)
+        out->reset
     );
     fprintf(
-        out,
+        out->output,
         "| %sTest Cases%s: %s%-13lu%s|\n",
-        get_fg_color_if_tty(L_BLUE, out),
-        get_reset_if_tty(out),
-        get_fg_color_if_tty(L_MAGENTA, out),
+        out->fg.l_blue,
+        out->reset,
+        out->fg.l_magenta,
         list->count,
-        get_reset_if_tty(out)
+        out->reset
     );
-    fprintf(out, "+==========================+\n");
+    fprintf(out->output, "+==========================+\n");
     //[==========] Running 1 test cases.
     int failures = 0;
     for(size_t i = 0; i < list->count; i++) {
@@ -214,19 +214,24 @@ int ktest_main(int argc, char** argv, const char* name, int (*test_setup)(kTestL
     int   line      = -1;
     char* file      = no_file;
     int   ret       = -1;
+    outputInfo out  = { 0 };
+    console_set_output_info(&out, stdout);
 
-    printf(
+    fprintf(
+        out.output,
         "Setting Up: %s'%s'%s\n",
-        get_fg_color_if_tty(L_CYAN, stdout),
-        name, get_reset_if_tty(stdout)
+        out.fg.l_cyan,
+        name,
+        out.reset
     );
 
     ret = test_setup(&list, &file, &line);
     if(ret != KTEST_SUCCESS) {
-        printf(
+        fprintf(
+            out.output,
             "%sSetup Failure%s: %s:%d\n",
-            get_fg_color_if_tty(L_RED, stdout),
-            get_reset_if_tty(stdout),
+            out.fg.l_red,
+            out.reset,
             file,
             line
         );
@@ -234,12 +239,13 @@ int ktest_main(int argc, char** argv, const char* name, int (*test_setup)(kTestL
         ktest_free_tests(&list);
         return EXIT_FAILURE;
     }
-    printf(
+    fprintf(
+        out.output,
         "Setup: %sDone%s\n",
-        get_fg_color_if_tty(L_GREEN, stdout),
-        get_reset_if_tty(stdout)
+        out.fg.l_green,
+        out.reset
     );
-    ret = ktest_run_tests(stdout, name, &list);
+    ret = ktest_run_tests(&out, name, &list);
     ktest_free_tests(&list);
 
     if(ret) {
