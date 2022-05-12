@@ -1,3 +1,5 @@
+#define _XOPEN_SOURCE 700
+
 #include "console.h"
 #include "sys-info.h"
 
@@ -8,7 +10,7 @@
     #include <io.h>
     #define isatty _isatty
     #define fileno _fileno
-#elif CURRENT_OS == OS_UNIX_LIKE
+#elif CURRENT_OS == OS_LINUX || CURRENT_OS == OS_UNIX_LIKE
     #include <unistd.h>
     #include <sys/ioctl.h>
 #endif
@@ -108,7 +110,7 @@ int console_get_width(FILE* file) {
             return -1;
         }
         return (info.srWindow.Right - info.srWindow.Left);
-    #elif CURRENT_OS == OS_UNIX_LIKE
+    #elif CURRENT_OS == OS_LINUX || CURRENT_OS == OS_UNIX_LIKE
         struct winsize sz = { 0 };
         if(ioctl(fd, TIOCGWINSZ, &sz) == -1) {
             return -1;

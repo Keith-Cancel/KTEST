@@ -2,6 +2,7 @@
 #define KSYS_INFO_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 #define ARCH_UNKNOWN  0x0000U
 #define X86_32        0x0100U

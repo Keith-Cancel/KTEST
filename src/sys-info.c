@@ -17,14 +17,7 @@ size_t get_memory_page_size() {
     return info.dwPageSize;
 }
 
-#elif CURRENT_OS == OS_LINUX
-#include <unistd.h>
-
-size_t get_memory_page_size() {
-    return getpagesize();
-}
-
-#elif CURRENT_OS == OS_UNIX_LIKE
+#elif CURRENT_OS == OS_UNIX_LIKE || CURRENT_OS == OS_LINUX
 #include <unistd.h>
 
 size_t get_memory_page_size() {
