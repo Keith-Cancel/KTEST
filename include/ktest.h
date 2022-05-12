@@ -20,7 +20,7 @@ typedef void (*tcFn) (kTestStatus*, void*);
 typedef void (*fixFn)(kTestStatus*, void*);
 typedef void (*tearFn)(kTestStatus*, void*);
 
-int ktest_main(int argc, char** argv, const char* name, int (*test_setup)(kTestList*, int*));
+int ktest_main(int argc, char** argv, const char* name, int (*test_setup)(kTestList*, char**, int*));
 int ktest_add_test_case(size_t* handle, kTestList* list, tcFn test_func, const char* name, const char* description);
 int ktest_set_fixture(size_t handle, kTestList* list, fixFn setup, tearFn teardown, size_t fixture_size);
 
@@ -40,17 +40,17 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
 #define KTEST_UNKOWN_MEM     (0x0FFF | _KTEST_MEMORY_ERR)
 
 #define KTEST_CASE(NAME)          void ktest_case_##NAME(kTestStatus* status__, void* fix)
-#define KTEST_CASE_FIX(NAME, FIX) void ktest_case_##NAME(kTestStatus* status__, struct FIX * fix)
+#define KTEST_CASE_FIX(NAME, FIX) void ktest_case_##NAME(kTestStatus* status__, struct FIX* fix)
 
-#define KTEST_FIX(NAME)           void ktest_fixture_##NAME(kTestStatus* status__, struct NAME* fix)
-#define KTEST_FIX_TEARDOWN(NAME)  void ktest_teardown_##NAME(kTestStatus* status__, struct NAME* fix)
+#define KTEST_FIX(NAME)           void ktest_fixture_##NAME(kTestStatus* status__, struct NAME** fix)
+#define KTEST_FIX_TEARDOWN(NAME)  void ktest_teardown_##NAME(kTestStatus* status__, struct NAME** fix)
 
 #define KTEST_SETUP(NAME) \
-    int ktest_setup_##NAME(kTestList* ktest_list__, int* ktest_line__); \
+    int ktest_setup_##NAME(kTestList* ktest_list__, char** ktest_file__, int* ktest_line__); \
     int main(int argc, char **argv) { \
         return ktest_main(argc, argv, #NAME, ktest_setup_##NAME); \
     } \
-    int ktest_setup_##NAME(kTestList* ktest_list__, int* ktest_line__)
+    int ktest_setup_##NAME(kTestList* ktest_list__, char** ktest_file__, int* ktest_line__)
 
 #define KTEST_ADD_CASE(NAME, HANDLE_OUT) KTEST_ADD_CASE_EX(NAME, HANDLE_OUT, "")
 
@@ -58,6 +58,7 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
     do { \
         int ktest_err = ktest_add_test_case((HANDLE_OUT), ktest_list__, (tcFn)ktest_case_##NAME, #NAME, DESCRIPTION); \
         if(ktest_err != KTEST_SUCCESS) { \
+            *ktest_file__ = __FILE__; \
             *ktest_line__ = __LINE__; \
             return ktest_err; \
         } \
@@ -67,6 +68,7 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
     do { \
         int ktest_err = ktest_set_fixture((HANDLE), ktest_list__, (fixFn)ktest_fixture_##NAME, (tearFn)ktest_teardown_##NAME, sizeof(struct NAME)); \
         if(ktest_err != KTEST_SUCCESS) { \
+            *ktest_file__ = __FILE__; \
             *ktest_line__ = __LINE__; \
             return ktest_err; \
         } \

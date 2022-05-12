@@ -96,6 +96,73 @@ void ktest_free_test_list(kTestList* list) {
     list->tests    = NULL;
 }
 
+int ktest_run_test_case(FILE* out, TestCase* tc) {
+    void*       fix  = NULL;
+    kTestStatus stat = { 
+        .output = out
+    };
+    fprintf(
+        out,
+        "[ %sRunning%s: %s%-16s%s]\n",
+        get_fg_color_if_tty(L_BLUE, out),
+        get_reset_if_tty(out),
+        get_fg_color_if_tty(L_CYAN, out),
+        tc->name,
+        get_reset_if_tty(out)
+    );
+    if(tc->setup != NULL) {
+        tc->setup(&stat, &fix);
+    }
+
+    tc->test_func(&stat, fix);
+
+    if(tc->tear  != NULL) {
+        tc->tear(&stat, &fix);
+    }
+    if(stat.result) {
+
+    } else {
+        fprintf(
+            out,
+            "[ %sResult%s: %sPassed%s           ]\n",
+            get_fg_color_if_tty(L_BLUE, out),
+            get_reset_if_tty(out),
+            get_fg_color_if_tty(L_GREEN, out),
+            get_reset_if_tty(out)
+        );
+    }
+    return 0;
+}
+
+int ktest_run_tests(FILE* out, const char* name, const kTestList* list) {
+    fprintf(out, "+==========================+\n");
+    fprintf(
+        out,
+        "| %sRunning%s: %s%-16s%s|\n",
+        get_fg_color_if_tty(L_BLUE, out),
+        get_reset_if_tty(out),
+        get_fg_color_if_tty(L_CYAN, out),
+        name,
+        get_reset_if_tty(out)
+    );
+    fprintf(
+        out,
+        "| %sTest Cases%s: %s%-13lu%s|\n",
+        get_fg_color_if_tty(L_BLUE, out),
+        get_reset_if_tty(out),
+        get_fg_color_if_tty(L_MAGENTA, out),
+        list->count,
+        get_reset_if_tty(out)
+    );
+    fprintf(out, "+==========================+\n");
+    //[==========] Running 1 test cases.
+    int failures = 0;
+    for(size_t i = 0; i < list->count; i++) {
+        failures += ktest_run_test_case(out, &(list->tests[i]));
+    }
+    return failures;
+}
+
 int ktest_str_eq(FILE* out, const char* file, unsigned line, const char* str1, const char* str2) {
     const char* cur1 = str1;
     const char* cur2 = str2;
@@ -140,11 +207,13 @@ struct test_status_s {
     FILE* output;
 };
 
-int ktest_main(int argc, char** argv, const char* name, int (*test_setup)(kTestList*, int*)) {
+int ktest_main(int argc, char** argv, const char* name, int (*test_setup)(kTestList*, char**, int*)) {
     console_init();
-    kTestList list = { 0 };
-    int line = -1;
-    int ret  = -1;
+    kTestList list  = { 0 };
+    char  no_file[] = "NO FILE";
+    int   line      = -1;
+    char* file      = no_file;
+    int   ret       = -1;
 
     printf(
         "Setting Up: %s'%s'%s\n",
@@ -152,14 +221,15 @@ int ktest_main(int argc, char** argv, const char* name, int (*test_setup)(kTestL
         name, get_reset_if_tty(stdout)
     );
 
-    ret = test_setup(&list, &line);
+    ret = test_setup(&list, &file, &line);
     if(ret != KTEST_SUCCESS) {
         printf(
-            "Setup: %sFailed%s\n",
+            "%sSetup Failure%s: %s:%d\n",
             get_fg_color_if_tty(L_RED, stdout),
-            get_reset_if_tty(stdout)
+            get_reset_if_tty(stdout),
+            file,
+            line
         );
-        printf("Line: %d\n", line);
         printf("Return Code: %d\n", ret);
         ktest_free_tests(&list);
         return EXIT_FAILURE;
@@ -169,10 +239,13 @@ int ktest_main(int argc, char** argv, const char* name, int (*test_setup)(kTestL
         get_fg_color_if_tty(L_GREEN, stdout),
         get_reset_if_tty(stdout)
     );
+    ret = ktest_run_tests(stdout, name, &list);
+    ktest_free_tests(&list);
 
+    if(ret) {
+        return EXIT_FAILURE;
+    }
     // Just here temporary so I don't see unused variable warnings
-    char a = name[0];
     char b = argv[argc-1][0];
-
-    return EXIT_SUCCESS + a + b;
+    return EXIT_SUCCESS + b;
 }
