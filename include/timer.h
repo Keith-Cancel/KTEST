@@ -48,11 +48,47 @@ static void timer_get_str(const timerData* data, char buffer[14]) {
         i++;
         amt /= 1000;
     }
-    snprintf(buffer, 14, "%.1f%s", amt, units[i]);
+    snprintf(buffer, 14, "%.2f%s", amt, units[i]);
 }
 
 #elif CURRENT_OS == OS_WINDOWS
-    #error "Not ported to windows yet!"
+#include <windows.h>
+typedef struct {
+    LARGE_INTEGER t0;
+    LARGE_INTEGER t1;
+} timerData;
+
+static FORCE_INLINE void timer_start(timerData* data) {
+    QueryPerformanceCounter(&(data->t0));
+);
+
+static FORCE_INLINE void timer_stop(timerData* data) {
+    QueryPerformanceCounter(&(data->t1));
+}
+
+static void timer_get_str(const timerData* data, char buffer[14]) {
+    char units[5][3] = {
+        { "ns" },
+        { "us" },
+        { "ms" },
+        { "s"  },
+        { "ks" }
+    };
+    LARGE_INTEGER freq = { 0 };
+    if(!QueryPerformanceFrequency(&freq) || freq.QuadPart == 0) {
+        snprintf(buffer, 14, "Failed!");
+    }
+    int64_t time  = data->t1.QuadPart - data->t0.QuadPart;
+    double  scale = 1000000000.0d / ((double)freq.QuadPart);
+    double  amt   = double(time) * scale; // Time in nano seconds
+    int     i     = 0;
+    while(amt > 1000 && i < 5) {
+        i++;
+        amt /= 1000;
+    }
+    snprintf(buffer, 14, "%.2f%s", amt, units[i]);
+}
+
 #endif
 
 
