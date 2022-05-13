@@ -42,8 +42,8 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
 #define KTEST_CASE(NAME)          void ktest_case_##NAME(kTestStatus* status__, void* fix)
 #define KTEST_CASE_FIX(NAME, FIX) void ktest_case_##NAME(kTestStatus* status__, struct FIX* fix)
 
-#define KTEST_FIX(NAME)           void ktest_fixture_##NAME(kTestStatus* status__, struct NAME** fix)
-#define KTEST_FIX_TEARDOWN(NAME)  void ktest_teardown_##NAME(kTestStatus* status__, struct NAME** fix)
+#define KTEST_FIX(NAME)           void ktest_fixture_##NAME(kTestStatus* status__, struct NAME* fix)
+#define KTEST_FIX_TEARDOWN(NAME)  void ktest_teardown_##NAME(kTestStatus* status__, struct NAME* fix)
 
 #define KTEST_SETUP(NAME) \
     int ktest_setup_##NAME(kTestList* ktest_list__, char** ktest_file__, int* ktest_line__); \
