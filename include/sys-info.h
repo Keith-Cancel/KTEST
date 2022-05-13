@@ -4,6 +4,12 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#if defined(__GNUC__)
+    #define FORCE_INLINE __attribute__((always_inline)) inline
+#else
+    #define FORCE_INLINE inline
+#endif
+
 #define ARCH_UNKNOWN  0x0000U
 #define X86_32        0x0100U
 #define X86_64        0x0101U

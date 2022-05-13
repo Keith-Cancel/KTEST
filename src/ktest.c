@@ -5,6 +5,7 @@
 
 #include "ktest.h"
 #include "console.h"
+#include "timer.h"
 
 typedef struct test_case_s {
     tcFn   test_func;
@@ -97,19 +98,23 @@ void ktest_free_test_list(kTestList* list) {
 }
 
 int ktest_run_test_case(outputInfo* out, TestCase* tc) {
-    void*       fix  = NULL;
-    kTestStatus stat = { 
+    char        buffer[14]  = { 0 };
+    timerData   t           = { 0 };
+    void*       fix         = NULL;
+    kTestStatus stat        = { 
         .output = out->output
     };
+    fprintf(out->output, "+===========================+\n");
     fprintf(
         out->output,
-        "[ %sRunning%s: %s%-16s%s]\n",
+        "[    %sRunning%s : %s%-13s%s]\n",
         out->fg.l_blue,
         out->reset,
         out->fg.l_cyan,
         tc->name,
         out->reset
     );
+    timer_start(&t);
     if(tc->setup != NULL) {
         tc->setup(&stat, &fix);
     }
@@ -119,26 +124,38 @@ int ktest_run_test_case(outputInfo* out, TestCase* tc) {
     if(tc->tear  != NULL) {
         tc->tear(&stat, &fix);
     }
+    timer_stop(&t);
+    timer_get_str(&t, buffer);
     if(stat.result) {
-
-    } else {
-        fprintf(
-            out->output,
-            "[ %sResult%s: %sPassed%s           ]\n",
-            out->fg.l_blue,
-            out->reset,
-            out->fg.l_green,
-            out->reset
-        );
+        fprintf(out->output, "\n Expects Ran : %u\n", stat.expects);
+        fprintf(out->output, " Asserts Ran : %u\n", stat.asserts);
     }
+    fprintf(
+        out->output,
+        "[     %sResult%s : %s%-13s%s]\n",
+        out->fg.l_cyan,
+        out->reset,
+        stat.result ? out->fg.l_red : out->fg.l_green,
+        stat.result ? "Failed" : "Passed",
+        out->reset
+    );
+    fprintf(
+        out->output,
+        "[       %sTime%s : %s%-13s%s]\n",
+        out->fg.l_yellow,
+        out->reset,
+        out->fg.l_magenta,
+        buffer,
+        out->reset
+    );
     return 0;
 }
 
 int ktest_run_tests(outputInfo* out, const char* name, const kTestList* list) {
-    fprintf(out->output, "+==========================+\n");
+    fprintf(out->output, "+===========================+\n");
     fprintf(
         out->output,
-        "| %sRunning%s: %s%-16s%s|\n",
+        "| %sRunning%s: %s%-17s%s|\n",
         out->fg.l_blue,
         out->reset,
         out->fg.l_cyan,
@@ -147,14 +164,13 @@ int ktest_run_tests(outputInfo* out, const char* name, const kTestList* list) {
     );
     fprintf(
         out->output,
-        "| %sTest Cases%s: %s%-13lu%s|\n",
+        "| %sTest Cases%s: %s%-14lu%s|\n",
         out->fg.l_blue,
         out->reset,
         out->fg.l_magenta,
         list->count,
         out->reset
     );
-    fprintf(out->output, "+==========================+\n");
     //[==========] Running 1 test cases.
     int failures = 0;
     for(size_t i = 0; i < list->count; i++) {

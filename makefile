@@ -1,5 +1,5 @@
 CC       := gcc
-CFLAGS   := -std=c11 -Os -fno-ident -falign-functions -Werror
+CFLAGS   := -std=c11 -Os -fno-ident -falign-functions -Werror -D_POSIX_C_SOURCE=200809
 LDFLAGS  :=
 LDLIBS   :=
 INCLUDES := -I./include
