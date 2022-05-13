@@ -15,6 +15,7 @@ typedef struct test_case_s {
     char*  description;
     size_t fix_sz;
     int    status;
+    int    skip;
 } TestCase;
 
 struct test_list_s {
@@ -42,6 +43,7 @@ int ktest_add_test_case(size_t* handle, kTestList* list, tcFn test_func, const c
     cur->description = NULL;
     cur->fix_sz      = 0;
     cur->status      = 0;
+    cur->skip        = 0;
 
     size_t name_len  = strlen(name) + 1;
     size_t desc_len  = strlen(description) + 1;
@@ -276,10 +278,6 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
     }
     return 0;
 }
-
-struct test_status_s {
-    FILE* output;
-};
 
 int ktest_main(int argc, char** argv, const char* name, int (*test_setup)(kTestList*, char**, int*)) {
     console_init();

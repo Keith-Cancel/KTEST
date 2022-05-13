@@ -82,6 +82,4 @@ static void timer_get_str(const timerData* data, char buffer[14]) {
 
 #endif
 
-
-
 #endif
