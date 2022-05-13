@@ -5,6 +5,22 @@
 #include <stdint.h>
 #include <math.h>
 
+static void timer_format_ns(double amt, char buffer[14]) {
+    char units[5][3] = {
+        { "ns" },
+        { "us" },
+        { "ms" },
+        { "s"  },
+        { "ks" }
+    };
+    int i = 0;
+    while(fabs(amt) > 1000 && i < 5) {
+        i++;
+        amt /= 1000;
+    }
+    snprintf(buffer, 14, i == 0 ? "%.0f%s" : "%.2f%s", amt, units[i]);
+}
+
 #if CURRENT_OS == OS_LINUX || CURRENT_OS == OS_UNIX_LIKE
 #include <time.h>
 
@@ -22,13 +38,6 @@ static FORCE_INLINE void timer_stop(timerData* data) {
 }
 
 static void timer_get_str(const timerData* data, char buffer[14]) {
-    char units[5][3] = {
-        { "ns" },
-        { "us" },
-        { "ms" },
-        { "s"  },
-        { "ks" }
-    };
     uint32_t n0     = data->t0.tv_nsec;
     uint32_t n1     = data->t1.tv_nsec;
     uint32_t borrow = n0 > n1;
@@ -42,13 +51,7 @@ static void timer_get_str(const timerData* data, char buffer[14]) {
         snprintf(buffer, 14, "%d.%ds", secs, tens);
         return;
     }
-    double amt = nsec;
-    int   i   = 0;
-    while(amt > 1000 && i < 5) {
-        i++;
-        amt /= 1000;
-    }
-    snprintf(buffer, 14, "%.2f%s", amt, units[i]);
+    timer_format_ns(nsec, buffer);
 }
 
 #elif CURRENT_OS == OS_WINDOWS
@@ -67,13 +70,6 @@ static FORCE_INLINE void timer_stop(timerData* data) {
 }
 
 static void timer_get_str(const timerData* data, char buffer[14]) {
-    char units[5][3] = {
-        { "ns" },
-        { "us" },
-        { "ms" },
-        { "s"  },
-        { "ks" }
-    };
     LARGE_INTEGER freq = { 0 };
     if(!QueryPerformanceFrequency(&freq) || freq.QuadPart == 0) {
         snprintf(buffer, 14, "Failed!");
@@ -81,12 +77,7 @@ static void timer_get_str(const timerData* data, char buffer[14]) {
     int64_t time  = data->t1.QuadPart - data->t0.QuadPart;
     double  scale = (double)1000000000.0f / ((double)freq.QuadPart);
     double  amt   = time * scale; // Time in nano seconds
-    int     i     = 0;
-    while(amt > 1000 && i < 5) {
-        i++;
-        amt /= 1000;
-    }
-    snprintf(buffer, 14, "%.2f%s", amt, units[i]);
+    timer_format_ns(amt, buffer);
 }
 
 #endif
