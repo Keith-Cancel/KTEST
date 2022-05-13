@@ -67,6 +67,22 @@ int ktest_add_test_case(size_t* handle, kTestList* list, tcFn test_func, const c
     return KTEST_SUCCESS;
 }
 
+void ktest_skip_all(kTestList* list) {
+    for(size_t i = 0; i < list->count; i++) {
+        list->tests[i].skip = 1;
+    }
+}
+
+int ktest_set_skip(kTestList* list, const char* name, int skip) {
+    for(size_t i = 0; i < list->count; i++) {
+        if(strcmp(name, list->tests[i].name) == 0) {
+            list->tests[i].skip = skip;
+            return 1;
+        }
+    }
+    return 0;
+}
+
 static void ktest_free_tests(kTestList* list) {
     for(size_t i = 0; i < list->count; i++) {
         free(list->tests[i].name);
@@ -121,7 +137,7 @@ int ktest_run_test_case(outputInfo* out, TestCase* tc) {
         fix = malloc(tc->fix_sz);
         if(fix == NULL) {
             fprintf(out->output, "%s+===========================+\n", out->fg.l_red);
-            fprintf(out->output, "| ALLOCATING FIXTURE FAILED |\n");
+            fprintf(out->output, "| %sALLOCATING FIXTURE FAILED%s |\n", out->bold, out->normal);
             fprintf(out->output, "+===========================+%s\n", out->reset);
             return 1;
         }
@@ -148,9 +164,10 @@ int ktest_run_test_case(outputInfo* out, TestCase* tc) {
     }
     fprintf(
         out->output,
-        "[     %sResult%s : %s%-13s%s]\n",
+        "[     %sResult%s : %s%s%-13s%s]\n",
         out->fg.l_cyan,
         out->reset,
+        out->bold,
         stat.result ? out->fg.l_red : out->fg.l_green,
         stat.result ? "Failed" : "Passed",
         out->reset
@@ -180,24 +197,42 @@ int ktest_run_tests(outputInfo* out, const char* name, const kTestList* list) {
     );
     fprintf(
         out->output,
-        "| %sTest Cases%s: %s%-14zu%s|\n",
+        "| %sTest Cases%s: %s%s%-14zu%s|\n",
         out->fg.l_blue,
         out->reset,
+        out->bold,
         out->fg.l_magenta,
         list->count,
         out->reset
     );
     int failures = 0;
     int passed   = list->count;
+    int skipped  = 0;
     timerData  t = { 0 };
 
     timer_start(&t);
     for(size_t i = 0; i < list->count; i++) {
+        if(list->tests[i].skip) {
+            fprintf(out->output, "+===========================+\n");
+            fprintf(
+                out->output,
+                "[  %s%sSkipping%s : %s%-13s%s]\n",
+                out->bold,
+                out->fg.l_yellow,
+                out->reset,
+                out->fg.l_cyan,
+                list->tests[i].name,
+                out->reset
+            );
+            skipped++;
+            continue;
+        }
         failures += ktest_run_test_case(out, &(list->tests[i]));
     }
     timer_stop(&t);
 
     passed -= failures;
+    passed -= skipped;
     fprintf(out->output, "+===========================+\n");
     fprintf(
         out->output,
@@ -208,20 +243,32 @@ int ktest_run_tests(outputInfo* out, const char* name, const kTestList* list) {
     );
     fprintf(
         out->output,
-        "Test Cases %sPassed%s : %s%d%s\n",
-        passed > 0 ? out->fg.l_green : out->reset,
+        "Test Cases %sPassed%s : %s%s%d%s\n",
+        passed > 0 ? out->fg.l_green : "",
         out->reset,
-        out->fg.l_magenta,
+        passed > 0 ? out->bold : "",
+        passed > 0 ? out->fg.l_magenta : "",
         passed,
         out->reset
     );
     fprintf(
         out->output,
-        "Test Cases %sFailed%s : %s%d%s\n",
-        failures ? out->fg.l_red : out->reset,
+        "Test Cases %sFailed%s : %s%s%d%s\n",
+        failures ? out->fg.l_red : "",
         out->reset,
-        out->fg.l_magenta,
+        failures > 0 ? out->bold : "",
+        failures > 0 ? out->fg.l_magenta : "",
         failures,
+        out->reset
+    );
+    fprintf(
+        out->output,
+        "Test Cases %sSkipped%s : %s%s%d%s\n",
+        skipped ? out->fg.l_yellow : "",
+        out->reset,
+        skipped > 0 ? out->bold : "",
+        skipped > 0 ? out->fg.l_magenta : "",
+        skipped,
         out->reset
     );
 
@@ -279,6 +326,81 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
     return 0;
 }
 
+void print_err_cmd(outputInfo* err, const char* prog, const char* cmd, const char* msg) {
+    fprintf(
+        err->output,
+        "%s%s: %serror:%s %s ‘%s%s%s’\n",
+        err->bold,
+        prog,
+        err->fg.l_red,
+        err->reset,
+        msg,
+        err->bold,
+        cmd,
+        err->reset
+    );
+}
+
+int process_args(int argc, char** argv, kTestList* list) {
+    outputInfo  output = { 0 };
+    outputInfo* err    = &output;
+    console_set_output_info(err, stderr);
+
+    int skip = 0;
+    int run  = 0;
+    for(int i = 1; i < argc; i++) {
+        if(strcmp("-s", argv[i]) == 0) {
+            skip += 1;
+            continue;
+        }
+        if(strcmp("-r", argv[i]) == 0) {
+            run += 1;
+            continue;
+        }
+        if(argv[i][0] == '-') {
+            print_err_cmd(err, argv[0], argv[i], "unrecognized command-line option");
+            return 1;
+        }
+        if(!(skip || run)) {
+            print_err_cmd(err, argv[0], argv[i], "unexpected input");
+            return 1;
+        }
+    }
+
+    if(skip && run) {
+        fprintf(
+            err->output,
+            "%s%s: %serror:%s conflicting command-line options ‘%s-r%s’ and ‘%s-s%s’\n",
+            err->bold,
+            argv[0],
+            err->fg.l_red,
+            err->reset,
+            err->bold,
+            err->reset,
+            err->bold,
+            err->reset
+        );
+        return 1;
+    }
+
+    if(skip > 1 || run > 1) {
+        print_err_cmd(err, argv[0], (run > 1) ? "-r" : "-s", "duplicate command-line option");
+        return 1;
+    }
+
+    if(run) {
+        ktest_skip_all(list);
+    }
+
+    for(int i = 2; i < argc; i++) {
+        if(!ktest_set_skip(list, argv[i], skip)) {
+            print_err_cmd(err, argv[0], argv[i], "can not find test case");
+            return 1;
+        }
+    }
+    return 0;
+}
+
 int ktest_main(int argc, char** argv, const char* name, int (*test_setup)(kTestList*, char**, int*)) {
     console_init();
     kTestList list  = { 0 };
@@ -317,13 +439,17 @@ int ktest_main(int argc, char** argv, const char* name, int (*test_setup)(kTestL
         out.fg.l_green,
         out.reset
     );
+
+    if(process_args(argc, argv, &list)) {
+        ktest_free_tests(&list);
+        return EXIT_FAILURE;
+    }
+
     ret = ktest_run_tests(&out, name, &list);
     ktest_free_tests(&list);
-
     if(ret) {
         return EXIT_FAILURE;
     }
-    // Just here temporary so I don't see unused variable warnings
-    char b = argv[argc-1][0];
-    return EXIT_SUCCESS + b;
+
+    return EXIT_SUCCESS;
 }
