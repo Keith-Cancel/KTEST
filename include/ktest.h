@@ -113,13 +113,13 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
         status__->asserts++;\
         if ((x) != 1) {     \
             KTEST_PRINTF("Test Failure : %s:%u\n", __FILE__, __LINE__); \
-            KTEST_PRINTF("    Expected : true\n");     \
+            KTEST_PRINTF("    Asserted : true\n");     \
             if((x) == 0) {                             \
-                KTEST_PRINTF("      Actual : false\n");\
+                KTEST_PRINTF("      Actual : false\n\n");\
             } else {                                   \
                 KTEST_PRINTF("      Actual : ");       \
                 KTEST_VAL_PRINT(x);                    \
-                KTEST_PRINTF("\n");                    \
+                KTEST_PRINTF("\n\n");                  \
             }                                          \
             status__->result = 1;                      \
             return;                                    \
@@ -131,13 +131,13 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
         status__->asserts++; \
         if ((x) != 0) {      \
             KTEST_PRINTF("Test Failure : %s:%u\n", __FILE__, __LINE__); \
-            KTEST_PRINTF("    Expected : false\n");    \
+            KTEST_PRINTF("    Asserted : false\n");    \
             if((x) == 1) {                             \
-                KTEST_PRINTF("      Actual : true\n"); \
+                KTEST_PRINTF("      Actual : true\n\n"); \
             } else {                                   \
                 KTEST_PRINTF("      Actual : ");       \
                 KTEST_VAL_PRINT(x);                    \
-                KTEST_PRINTF("\n");                    \
+                KTEST_PRINTF("\n\n");                  \
             }                                          \
             status__->result = 1;                      \
             return;                                    \
@@ -151,11 +151,11 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
             KTEST_PRINTF("Test Failure : %s:%u\n", __FILE__, __LINE__); \
             KTEST_PRINTF("    Expected : true\n");     \
             if((x) == 0) {                             \
-                KTEST_PRINTF("      Actual : false\n");\
+                KTEST_PRINTF("      Actual : false\n\n");\
             } else {                                   \
                 KTEST_PRINTF("      Actual : ");       \
                 KTEST_VAL_PRINT(x);                    \
-                KTEST_PRINTF("\n");                    \
+                KTEST_PRINTF("\n\n");                  \
             }                                          \
             status__->result = 1;                      \
         }                                              \
@@ -168,11 +168,11 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
             KTEST_PRINTF("Test Failure : %s:%u\n", __FILE__, __LINE__); \
             KTEST_PRINTF("    Expected : false\n");    \
             if((x) == 1) {                             \
-                KTEST_PRINTF("      Actual : true\n"); \
+                KTEST_PRINTF("      Actual : true\n\n"); \
             } else {                                   \
                 KTEST_PRINTF("      Actual : ");       \
                 KTEST_VAL_PRINT(x);                    \
-                KTEST_PRINTF("\n");                    \
+                KTEST_PRINTF("\n\n");                  \
             }                                          \
             status__->result = 1;                      \
         }                                              \
@@ -183,14 +183,14 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
         status__->asserts++; \
         if(!((x) cmp (y))) { \
             KTEST_PRINTF("Test Failure : %s:%u\n", __FILE__, __LINE__); \
-            KTEST_PRINTF("    Expected : {value} %s ", #cmp); \
+            KTEST_PRINTF("    Asserted : {value} %s ", #cmp); \
             KTEST_VAL_PRINT(y);                   \
             KTEST_PRINTF("\n");                   \
             KTEST_PRINTF("      Actual : ");      \
             KTEST_VAL_PRINT(x);                   \
             KTEST_PRINTF(" %s ", #cmp);           \
             KTEST_VAL_PRINT(y);                   \
-            KTEST_PRINTF("\n");                   \
+            KTEST_PRINTF("\n\n");                 \
             status__->result = 1;                 \
             return;                               \
         }                                         \
@@ -208,7 +208,7 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
             KTEST_VAL_PRINT(x);                   \
             KTEST_PRINTF(" %s ", #cmp);           \
             KTEST_VAL_PRINT(y);                   \
-            KTEST_PRINTF("\n");                   \
+            KTEST_PRINTF("\n\n");                 \
             status__->result = 1;                 \
         }                                         \
     } while(0)

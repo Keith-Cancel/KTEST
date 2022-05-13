@@ -127,7 +127,7 @@ int ktest_run_test_case(outputInfo* out, TestCase* tc) {
     timer_stop(&t);
     timer_get_str(&t, buffer);
     if(stat.result) {
-        fprintf(out->output, "\n Expects Ran : %u\n", stat.expects);
+        fprintf(out->output, " Expects Ran : %u\n", stat.expects);
         fprintf(out->output, " Asserts Ran : %u\n", stat.asserts);
     }
     fprintf(
@@ -203,7 +203,7 @@ int ktest_str_eq(FILE* out, const char* file, unsigned line, const char* str1, c
         for(size_t i = 0; i < good_bytes; i++) {
             fprintf(out, " ");// pad till reaching the point of difference.
         }
-        fprintf(out, "%s^\n%s", get_fg_color_if_tty(L_RED, out), get_reset_if_tty(out));
+        fprintf(out, "%s^%s\n\n", get_fg_color_if_tty(L_RED, out), get_reset_if_tty(out));
         return 1;
     }
     return 0;
@@ -213,7 +213,7 @@ int ktest_str_ne(FILE* out, const char* file, unsigned line, const char* str1, c
     if(strcmp(str1, str2) == 0) {
         fprintf(out, "Test Failure : %s:%u\n", file, line);
         fprintf(out, "Not Expected : %s\n", str2);
-        fprintf(out, "      Actual : %s%s%s\n", get_fg_color_if_tty(L_RED, out), str2, get_reset_if_tty(out));
+        fprintf(out, "      Actual : %s%s%s\n\n", get_fg_color_if_tty(L_RED, out), str2, get_reset_if_tty(out));
         return 1;
     }
     return 0;
