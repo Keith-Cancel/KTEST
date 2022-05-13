@@ -34,7 +34,20 @@ static const char* bg_colors[17] = {
     "\x1b[104m", "\x1b[105m", "\x1b[106m", "\x1b[107m"
 };
 
+// ANSI Escape Sequences
+static const char* intensities[3] = {
+    "\x1b[22m", "\x1b[1m", "\x1b[2m"
+};
+
 static const char* empty_str = "";
+
+static int file_is_tty(FILE* file) {
+    int fd = fileno(file);
+    if(fd == -1) {
+        return 0;
+    }
+    return isatty(fd);
+}
 
 int console_init() {
     setlocale(LC_ALL, "en_US.UTF-8");
@@ -66,39 +79,50 @@ const char* get_bg_color(unsigned color) {
     return bg_colors[color];
 }
 
+const char* console_get_intensity(unsigned intensity) {
+    if(intensity > FAINT) {
+        return intensities[0];
+    }
+    return intensities[intensity];
+}
+
 const char* get_reset() {
     return fg_colors[0];
 }
 
 const char* get_reset_if_tty(FILE* file) {
-    int fd = fileno(file);
-    if(fd == -1 || !isatty(fd)) {
+    if(!file_is_tty(file)) {
         return empty_str;
     }
     return get_reset();
 }
 
 const char* get_fg_color_if_tty(unsigned color, FILE* file) {
-    int fd = fileno(file);
-    if(fd == -1 || !isatty(fd)) {
+    if(!file_is_tty(file)) {
         return empty_str;
     }
     return get_fg_color(color);
 }
 
 const char* get_bg_color_if_tty(unsigned color, FILE* file) {
-    int fd = fileno(file);
-    if(fd == -1 || !isatty(fd)) {
+    if(!file_is_tty(file)) {
         return empty_str;
     }
     return get_bg_color(color);
 }
 
+const char* console_get_intensity_if_tty(unsigned intensity, FILE* file) {
+    if(!file_is_tty(file)) {
+        return empty_str;
+    }
+    return console_get_intensity(intensity);
+}
+
 int console_get_width(FILE* file) {
-    int fd = fileno(file);
-    if(fd == -1 && !isatty(fd)) {
+    if(!file_is_tty(file)) {
         return -1;
     }
+    int fd = fileno(file);
     #if CURRENT_OS == OS_WINDOWS
         CONSOLE_SCREEN_BUFFER_INFO info = { 0 };
         intptr_t ptr = _get_osfhandle(fd);
@@ -165,7 +189,10 @@ void console_set_output_info(outputInfo* out, FILE* file) {
     if(out->width < 1) {
         out->width = 80;
     }
-    out->reset = get_reset_if_tty(file);
+    out->reset  = get_reset_if_tty(file);
+    out->bold   = console_get_intensity_if_tty(BOLD, file);
+    out->faint  = console_get_intensity_if_tty(FAINT, file);
+    out->normal = console_get_intensity_if_tty(NORMAL, file);
     console_set_fg_colors_if_tty(&(out->fg), file);
     console_set_bg_colors_if_tty(&(out->bg), file);
 }

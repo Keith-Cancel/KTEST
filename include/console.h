@@ -11,6 +11,10 @@ enum colors {
     L_BLUE, L_MAGENTA, L_CYAN,  L_WHITE
 };
 
+enum Intensity {
+    NORMAL = 0, BOLD, FAINT
+};
+
 typedef struct {
     const char* reset;
     const char* black;
@@ -35,6 +39,9 @@ typedef struct {
     FILE*       output;
     int         width;
     const char* reset;
+    const char* faint;
+    const char* normal;
+    const char* bold;
     fgColors    fg;
     bgColors    bg;
 } outputInfo;
@@ -43,6 +50,7 @@ int         console_init();
 const char* get_reset();
 const char* get_fg_color(unsigned color);
 const char* get_bg_color(unsigned color);
+const char* console_get_intensity(unsigned intensity);
 
 int         console_get_width(FILE* file);
 void        console_set_output_info(outputInfo* out, FILE* file);
@@ -52,5 +60,6 @@ void        console_set_bg_colors_if_tty(bgColors* fg, FILE* file);
 const char* get_reset_if_tty(FILE* file);
 const char* get_fg_color_if_tty(unsigned color, FILE* file);
 const char* get_bg_color_if_tty(unsigned color, FILE* file);
+const char* console_get_intensity_if_tty(unsigned intensity, FILE* file);
 
 #endif
