@@ -216,7 +216,7 @@ int ktest_run_tests(outputInfo* out, const char* name, const kTestList* list) {
             fprintf(out->output, "+===========================+\n");
             fprintf(
                 out->output,
-                "[  %s%sSkipping%s : %s%-13s%s]\n",
+                "[   %s%sSkipping%s : %s%-13s%s]\n",
                 out->bold,
                 out->fg.l_yellow,
                 out->reset,
