@@ -115,17 +115,29 @@ int ktest_run_test_case(outputInfo* out, TestCase* tc) {
         out->reset
     );
 
+    if(tc->fix_sz) {
+        fix = malloc(tc->fix_sz);
+        if(fix == NULL) {
+            fprintf(out->output, "%s+===========================+%s\n", out->fg.l_red, out->reset);
+            fprintf(out->output, "%s| ALLOCATING FIXTURE FAILED |%s\n", out->fg.l_red, out->reset);
+            fprintf(out->output, "%s+===========================+%s\n", out->fg.l_red, out->reset);
+            return 1;
+        }
+        memset(fix, 0, tc->fix_sz);
+    }
+
     timer_start(&t);
     if(tc->setup != NULL) {
-        tc->setup(&stat, &fix);
+        tc->setup(&stat, fix);
     }
 
     tc->test_func(&stat, fix);
 
     if(tc->tear  != NULL) {
-        tc->tear(&stat, &fix);
+        tc->tear(&stat, fix);
     }
     timer_stop(&t);
+    free(fix);
     timer_get_str(&t, buffer);
 
     if(stat.result) {
