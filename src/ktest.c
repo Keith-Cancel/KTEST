@@ -118,9 +118,9 @@ int ktest_run_test_case(outputInfo* out, TestCase* tc) {
     if(tc->fix_sz) {
         fix = malloc(tc->fix_sz);
         if(fix == NULL) {
-            fprintf(out->output, "%s+===========================+%s\n", out->fg.l_red, out->reset);
-            fprintf(out->output, "%s| ALLOCATING FIXTURE FAILED |%s\n", out->fg.l_red, out->reset);
-            fprintf(out->output, "%s+===========================+%s\n", out->fg.l_red, out->reset);
+            fprintf(out->output, "%s+===========================+\n", out->fg.l_red);
+            fprintf(out->output, "| ALLOCATING FIXTURE FAILED |\n");
+            fprintf(out->output, "+===========================+%s\n", out->reset);
             return 1;
         }
         memset(fix, 0, tc->fix_sz);
