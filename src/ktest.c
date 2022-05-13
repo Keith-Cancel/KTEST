@@ -114,6 +114,7 @@ int ktest_run_test_case(outputInfo* out, TestCase* tc) {
         tc->name,
         out->reset
     );
+
     timer_start(&t);
     if(tc->setup != NULL) {
         tc->setup(&stat, &fix);
@@ -126,6 +127,7 @@ int ktest_run_test_case(outputInfo* out, TestCase* tc) {
     }
     timer_stop(&t);
     timer_get_str(&t, buffer);
+
     if(stat.result) {
         fprintf(out->output, " Expects Ran : %u\n", stat.expects);
         fprintf(out->output, " Asserts Ran : %u\n", stat.asserts);
@@ -148,7 +150,7 @@ int ktest_run_test_case(outputInfo* out, TestCase* tc) {
         buffer,
         out->reset
     );
-    return 0;
+    return stat.result;
 }
 
 int ktest_run_tests(outputInfo* out, const char* name, const kTestList* list) {
@@ -171,11 +173,55 @@ int ktest_run_tests(outputInfo* out, const char* name, const kTestList* list) {
         list->count,
         out->reset
     );
-    //[==========] Running 1 test cases.
     int failures = 0;
+    int passed   = list->count;
+    timerData  t = { 0 };
+
+    timer_start(&t);
     for(size_t i = 0; i < list->count; i++) {
         failures += ktest_run_test_case(out, &(list->tests[i]));
     }
+    timer_stop(&t);
+
+    passed -= failures;
+    fprintf(out->output, "+===========================+\n");
+    fprintf(
+        out->output,
+        "Summary for %s'%s'%s\n",
+        out->fg.l_cyan,
+        name,
+        out->reset
+    );
+    fprintf(
+        out->output,
+        "Test Cases %sPassed%s : %s%d%s\n",
+        passed > 0 ? out->fg.l_green : out->reset,
+        out->reset,
+        out->fg.l_magenta,
+        passed,
+        out->reset
+    );
+    fprintf(
+        out->output,
+        "Test Cases %sFailed%s : %s%d%s\n",
+        failures ? out->fg.l_red : out->reset,
+        out->reset,
+        out->fg.l_magenta,
+        failures,
+        out->reset
+    );
+
+    char buffer[14] = { 0 };
+    timer_get_str(&t, buffer);
+    fprintf(
+        out->output,
+        "       %sTotal Time%s : %s%s%s\n",
+        out->fg.l_yellow,
+        out->reset,
+        out->fg.l_magenta,
+        buffer,
+        out->reset
+    );
     return failures;
 }
 
