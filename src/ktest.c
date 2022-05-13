@@ -101,7 +101,7 @@ int ktest_run_test_case(outputInfo* out, TestCase* tc) {
     char        buffer[14]  = { 0 };
     timerData   t           = { 0 };
     void*       fix         = NULL;
-    kTestStatus stat        = { 
+    kTestStatus stat        = {
         .output = out->output
     };
     fprintf(out->output, "+===========================+\n");
@@ -166,7 +166,7 @@ int ktest_run_tests(outputInfo* out, const char* name, const kTestList* list) {
     );
     fprintf(
         out->output,
-        "| %sTest Cases%s: %s%-14lu%s|\n",
+        "| %sTest Cases%s: %s%-14zu%s|\n",
         out->fg.l_blue,
         out->reset,
         out->fg.l_magenta,

@@ -60,7 +60,7 @@ typedef struct {
 
 static FORCE_INLINE void timer_start(timerData* data) {
     QueryPerformanceCounter(&(data->t0));
-);
+}
 
 static FORCE_INLINE void timer_stop(timerData* data) {
     QueryPerformanceCounter(&(data->t1));
@@ -79,8 +79,8 @@ static void timer_get_str(const timerData* data, char buffer[14]) {
         snprintf(buffer, 14, "Failed!");
     }
     int64_t time  = data->t1.QuadPart - data->t0.QuadPart;
-    double  scale = 1000000000.0d / ((double)freq.QuadPart);
-    double  amt   = double(time) * scale; // Time in nano seconds
+    double  scale = (double)1000000000.0f / ((double)freq.QuadPart);
+    double  amt   = time * scale; // Time in nano seconds
     int     i     = 0;
     while(amt > 1000 && i < 5) {
         i++;
